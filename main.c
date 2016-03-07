@@ -4,6 +4,8 @@
 #include <locale.h>
 #include <ctype.h>
 
+///////
+
 struct cabecalho
 {
     struct lista* iniciodecabecalho;
