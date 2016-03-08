@@ -1,0 +1,33 @@
+# depslib dependency file v1.0
+1432878098 source:c:\users\rafa\desktop\dfsdsdf\main.c
+	<allegro5/allegro.h>
+	<allegro5/allegro_primitives.h>
+
+1432878098 source:c:\users\rafa\desktop\grapic image test\main.c
+	<allegro5/allegro.h>
+	<allegro5/allegro_primitives.h>
+
+1457392575 source:c:\users\rafa\onedrive\ifsc\técnico integrado\7ª fase\programação (linguagem c)\allegro\grapic image test\main.c
+	<allegro5/allegro.h>
+	<allegro5/allegro_primitives.h>
+
+1457447274 source:c:\users\rafa\desktop\grafica\main.c
+	<allegro5/allegro.h>
+	<allegro5/allegro_primitives.h>
+	<allegro5/allegro_image.h>
+	<allegro5/allegro_opengl.h>
+	<allegro5/allegro_font.h>
+	<allegro5/allegro_native_dialog.h>
+	<allegro5/allegro_ttf.h>
+	<stdio.h>
+
+1457447379 source:c:\users\jonas\desktop\grafica\main.c
+	<allegro5/allegro.h>
+	<allegro5/allegro_primitives.h>
+	<allegro5/allegro_image.h>
+	<allegro5/allegro_opengl.h>
+	<allegro5/allegro_font.h>
+	<allegro5/allegro_native_dialog.h>
+	<allegro5/allegro_ttf.h>
+	<stdio.h>
+
