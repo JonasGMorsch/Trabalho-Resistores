@@ -1,0 +1,54 @@
+# depslib dependency file v1.0
+1448684837 source:d:\onedrive\ifsc\villaça - programação c\programação ii\nova lista 2 encadeada heterogenea\main.c
+	<stdio.h>
+	<stdlib.h>
+
+1449487538 source:d:\onedrive\ifsc\daniel - programação ii\nova lista 2 encadeada heterogenea\main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<locale.h>
+	<ctype.h>
+
+1449855726 source:d:\onedrive\ifsc\daniel - programação ii\trabalho resistores\main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<locale.h>
+	<ctype.h>
+
+1457027368 source:d:\onedrive\ifsc\daniel - programação ii\trabalhos\trabalho resistores\main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<locale.h>
+	<ctype.h>
+
+1457475539 source:c:\users\rafa\desktop\trabalho resistores - copy - copy\main.c
+	<allegro5/allegro.h>
+	<allegro5/allegro_primitives.h>
+	<allegro5/allegro_image.h>
+	<allegro5/allegro_opengl.h>
+	<allegro5/allegro_font.h>
+	<allegro5/allegro_native_dialog.h>
+	<allegro5/allegro_ttf.h>
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<locale.h>
+	<ctype.h>
+
+1457475539 source:c:\users\jonas\desktop\trabalho resistores - copy - copy\main.c
+	<allegro5/allegro.h>
+	<allegro5/allegro_primitives.h>
+	<allegro5/allegro_image.h>
+	<allegro5/allegro_opengl.h>
+	<allegro5/allegro_font.h>
+	<allegro5/allegro_native_dialog.h>
+	<allegro5/allegro_ttf.h>
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<locale.h>
+	<ctype.h>
+
