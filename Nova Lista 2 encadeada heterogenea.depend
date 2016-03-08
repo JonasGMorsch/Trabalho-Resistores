@@ -1,0 +1,26 @@
+# depslib dependency file v1.0
+1448684837 source:d:\onedrive\ifsc\villaça - programação c\programação ii\nova lista 2 encadeada heterogenea\main.c
+	<stdio.h>
+	<stdlib.h>
+
+1449487538 source:d:\onedrive\ifsc\daniel - programação ii\nova lista 2 encadeada heterogenea\main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<locale.h>
+	<ctype.h>
+
+1449855726 source:d:\onedrive\ifsc\daniel - programação ii\trabalho resistores\main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<locale.h>
+	<ctype.h>
+
+1457027409 source:d:\onedrive\ifsc\daniel - programação ii\trabalhos\trabalho resistores\main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<locale.h>
+	<ctype.h>
+
