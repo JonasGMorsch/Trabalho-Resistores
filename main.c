@@ -14,6 +14,9 @@
 const int SCREEN_W = 800;
 const int SCREEN_H = 600;
 
+enum teclas {key_1, key_2, key_3, key_4, key_5, key_6, key_7,key_esc,total_teclas};
+int Keys[total_teclas];
+bool doexit = false;
 struct cabecalho
 {
     struct lista* iniciodecabecalho;
@@ -457,6 +460,7 @@ int main()
     font2 = al_load_ttf_font("pirulen.TTF",20,0 );
     event_queue = al_create_event_queue();
     al_register_event_source(event_queue, al_get_display_event_source(display));
+    al_register_event_source(event_queue, al_get_keyboard_event_source());
     al_register_event_source(event_queue, al_get_mouse_event_source());
     al_draw_bitmap(img, 1, 1, 1);
 
@@ -488,7 +492,8 @@ int main()
     al_flip_display();
 
     setlocale(LC_CTYPE,"portuguese");
-    int p=3,n;
+    int p=3, n;
+
     int serie=0,quantidade=0;
     float resitencia=0,potencia=0,tolerancia=0;
     Lista* ListaAux;
@@ -510,122 +515,84 @@ int main()
     }
     ordernar(Cabecalho);
 
-    while(p!=7)
+    while(!doexit)
     {
         //printf("aqui no while");
+        fflush(stdin);
+        system("cls");
         ALLEGRO_EVENT ev;
         al_wait_for_event(event_queue, &ev);
 
-        if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP)
+        if(ev.type == ALLEGRO_EVENT_KEY_DOWN)
         {
-            printf("aqui");
-            if (ev.mouse.x >= al_get_bitmap_width(imagem1) && ev.mouse.x <= SCREEN_W -10 && ev.mouse.y <= SCREEN_H - 10 && ev.mouse.y >= al_get_bitmap_height(imagem1) - 10)
+            switch(ev.keyboard.keycode)
             {
-                p = 1;
-                printf("aqui2");
+            case ALLEGRO_KEY_1:
+            case ALLEGRO_KEY_PAD_1:
+                ordernar(Cabecalho);
+                imprime_todos(Cabecalho);
+                system("pause");
+                system("cls");
+                break;
+
+                break;
+            case ALLEGRO_KEY_2:
+            case ALLEGRO_KEY_PAD_2:
+                adiciona_resistor(Cabecalho);
+                system("pause");
+                system("cls");
+
+                break;
+            case ALLEGRO_KEY_3:
+            case ALLEGRO_KEY_PAD_3:
+                busca_resistor(Cabecalho);
+                system("pause");
+                system("cls");
+
+                break;
+            case ALLEGRO_KEY_4:
+            case ALLEGRO_KEY_PAD_4:
+                apaga_resistor(Cabecalho);
+                system("pause");
+                system("cls");
+                break;
+
+                break;
+            case ALLEGRO_KEY_5:
+            case ALLEGRO_KEY_PAD_5:
+                retira_resistor(Cabecalho);
+                system("pause");
+                system("cls");
+                break;
+
+
+            case ALLEGRO_KEY_6:
+            case ALLEGRO_KEY_PAD_6:
+                fp = fopen(NOME_ARQ,"w");
+                for (ListaAux=Cabecalho->iniciodecabecalho; ListaAux != NULL; ListaAux = ListaAux->listaprox)
+                    fprintf(fp,"%8.1f\t%.2d\t%5.2f\t%5.2f\t%.4d \n", ListaAux->ponteirodedados->resistencia, ListaAux->ponteirodedados->serie,ListaAux->ponteirodedados->tolerancia, ListaAux->ponteirodedados->potencia, ListaAux->ponteirodedados->quantidade);
+                //system("pause");
+                system("cls");
+                printf("*As alterações foram salvas*\n");
+                return 0;
+
+                break;
+            case ALLEGRO_KEY_7:
+            case ALLEGRO_KEY_PAD_7:
+                printf("FIM!");
+                doexit = true;
+
+                break;
+            case ALLEGRO_KEY_ESCAPE:
+                printf("FIM!");
+                doexit = true;
+
+                break;
+
+
             }
         }
-        /*
-        else if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP)
-        {
-            if (ev.mouse.x >= 520 && ev.mouse.x <= 700 && ev.mouse.y <= 100 && ev.mouse.y >= 110)
-            {
-                p = 2;
-
-            }
-        }
-        else if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP)
-        {
-            if (ev.mouse.x >= 520 && ev.mouse.x <= 700 && ev.mouse.y <= 100 && ev.mouse.y >= 110)
-            {
-                p = 3;
-
-            }
-        }
-
-        else if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP)
-        {
-            if (ev.mouse.x >= 520 && ev.mouse.x <= 700 && ev.mouse.y <= 100 && ev.mouse.y >= 110)
-            {
-                p = 4;
-
-            }
-        }
-
-        else if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP)
-        {
-            if (ev.mouse.x >= 520 && ev.mouse.x <= 700 && ev.mouse.y <= 100 && ev.mouse.y >= 110)
-            {
-                p = 5;
-
-            }
-        }
-
-        else if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP)
-        {
-            if (ev.mouse.x >= 520 && ev.mouse.x <= 700 && ev.mouse.y <= 100 && ev.mouse.y >= 110)
-            {
-                p = 6;
-
-            }
-        }
-
-        else if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP)
-        {
-            if (ev.mouse.x >= 520 && ev.mouse.x <= 700 && ev.mouse.y <= 100 && ev.mouse.y >= 110)
-            {
-                p = 7;
-
-            }
-        }
-*/
-
-        fflush(stdin);
-        system("cls");
-        switch (p)
-        {
-        case 1:
-            ordernar(Cabecalho);
-            imprime_todos(Cabecalho);
-            system("pause");
-            system("cls");
-            break;
-        case 2:
-            adiciona_resistor(Cabecalho);
-            system("pause");
-            system("cls");
-            break;
-        case 3:
-            busca_resistor(Cabecalho);
-            system("pause");
-            system("cls");
-            break;
-        case 4:
-            apaga_resistor(Cabecalho);
-            system("pause");
-            system("cls");
-            break;
-        case 5:
-            retira_resistor(Cabecalho);
-            system("pause");
-            system("cls");
-            break;
-        case 6:
-            fp = fopen(NOME_ARQ,"w");
-            for (ListaAux=Cabecalho->iniciodecabecalho; ListaAux != NULL; ListaAux = ListaAux->listaprox)
-                fprintf(fp,"%8.1f\t%.2d\t%5.2f\t%5.2f\t%.4d \n", ListaAux->ponteirodedados->resistencia, ListaAux->ponteirodedados->serie,ListaAux->ponteirodedados->tolerancia, ListaAux->ponteirodedados->potencia, ListaAux->ponteirodedados->quantidade);
-            //system("pause");
-            system("cls");
-            printf("*As alterações foram salvas*\n");
-            return 0;
-            break;
-        case 7:
-            printf("FIM!");
-            break;
-        }
-
     }
-
 
     al_destroy_bitmap(img);
     al_destroy_display(display);
