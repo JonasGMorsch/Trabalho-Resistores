@@ -11,8 +11,8 @@
 #include <locale.h>
 #include <ctype.h>
 
-const int LARGURA_TELA = 800;
-const int ALTURA_TELA = 600;
+const int SCREEN_W = 800;
+const int SCREEN_H = 600;
 
 struct cabecalho
 {
@@ -439,11 +439,11 @@ int main()
     ALLEGRO_FONT *font2 = NULL;
     ALLEGRO_BITMAP  *img   = NULL;
     ALLEGRO_BITMAP  *imagem1  = NULL;
-    ALLEGRO_EVENT_QUEUE *fila_eventos = NULL;
+    ALLEGRO_EVENT_QUEUE *event_queue = NULL;
 
     al_init();
 
-    display = al_create_display(LARGURA_TELA, ALTURA_TELA);
+    display = al_create_display(SCREEN_W, SCREEN_H);
     al_clear_to_color(al_map_rgb(168,168,168));
     al_set_window_title(display, "Base de dados de Resistores");
     al_init_image_addon();
@@ -455,10 +455,9 @@ int main()
     imagem1 = al_load_bitmap("fundo.png");
     font1 = al_load_ttf_font("pirulen.TTF",15,0 );
     font2 = al_load_ttf_font("pirulen.TTF",20,0 );
-    fila_eventos = al_create_event_queue();
-    // Dizemos que vamos tratar os eventos vindos do mouse
-    al_register_event_source(fila_eventos, al_get_mouse_event_source());
-
+    event_queue = al_create_event_queue();
+    al_register_event_source(event_queue, al_get_display_event_source(display));
+    al_register_event_source(event_queue, al_get_mouse_event_source());
     al_draw_bitmap(img, 1, 1, 1);
 
     // Exemplo de impressão de valores variáveis
@@ -511,87 +510,75 @@ int main()
     }
     ordernar(Cabecalho);
 
-    while((al_is_event_queue_empty(fila_eventos)) && (p!=7))
+    while(p!=7)
     {
-        //printf("aqui");
-        ALLEGRO_EVENT evento;
-        al_wait_for_event(fila_eventos, &evento);
-        if (evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP)
+        //printf("aqui no while");
+        ALLEGRO_EVENT ev;
+        al_wait_for_event(event_queue, &ev);
+
+        if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP)
         {
-            if (evento.mouse.x >= LARGURA_TELA - 390 - 10 &&
-                    evento.mouse.x <= LARGURA_TELA - 10 && evento.mouse.y <= ALTURA_TELA - 10 &&
-                    evento.mouse.y >= ALTURA_TELA - 90 - 10)
+            printf("aqui");
+            if (ev.mouse.x >= al_get_bitmap_width(imagem1) && ev.mouse.x <= SCREEN_W -10 && ev.mouse.y <= SCREEN_H - 10 && ev.mouse.y >= al_get_bitmap_height(imagem1) - 10)
             {
                 p = 1;
                 printf("aqui2");
             }
         }
-        else if (evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP)
+        /*
+        else if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP)
         {
-            if (evento.mouse.x >= 520 &&
-                    evento.mouse.x <= 700 && evento.mouse.y <= 100 &&
-                    evento.mouse.y >= 110)
+            if (ev.mouse.x >= 520 && ev.mouse.x <= 700 && ev.mouse.y <= 100 && ev.mouse.y >= 110)
             {
                 p = 2;
 
             }
         }
-        else if (evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP)
+        else if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP)
         {
-            if (evento.mouse.x >= 520 &&
-                    evento.mouse.x <= 700 && evento.mouse.y <= 100 &&
-                    evento.mouse.y >= 110)
+            if (ev.mouse.x >= 520 && ev.mouse.x <= 700 && ev.mouse.y <= 100 && ev.mouse.y >= 110)
             {
                 p = 3;
 
             }
         }
 
-        else if (evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP)
+        else if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP)
         {
-            if (evento.mouse.x >= 520 &&
-                    evento.mouse.x <= 700 && evento.mouse.y <= 100 &&
-                    evento.mouse.y >= 110)
+            if (ev.mouse.x >= 520 && ev.mouse.x <= 700 && ev.mouse.y <= 100 && ev.mouse.y >= 110)
             {
                 p = 4;
 
             }
         }
 
-        else if (evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP)
+        else if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP)
         {
-            if (evento.mouse.x >= 520 &&
-                    evento.mouse.x <= 700 && evento.mouse.y <= 100 &&
-                    evento.mouse.y >= 110)
+            if (ev.mouse.x >= 520 && ev.mouse.x <= 700 && ev.mouse.y <= 100 && ev.mouse.y >= 110)
             {
                 p = 5;
 
             }
         }
 
-        else if (evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP)
+        else if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP)
         {
-            if (evento.mouse.x >= 520 &&
-                    evento.mouse.x <= 700 && evento.mouse.y <= 100 &&
-                    evento.mouse.y >= 110)
+            if (ev.mouse.x >= 520 && ev.mouse.x <= 700 && ev.mouse.y <= 100 && ev.mouse.y >= 110)
             {
                 p = 6;
 
             }
         }
 
-        else if (evento.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP)
+        else if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP)
         {
-            if (evento.mouse.x >= 520 &&
-                    evento.mouse.x <= 700 && evento.mouse.y <= 100 &&
-                    evento.mouse.y >= 110)
+            if (ev.mouse.x >= 520 && ev.mouse.x <= 700 && ev.mouse.y <= 100 && ev.mouse.y >= 110)
             {
                 p = 7;
 
             }
         }
-        else
-            break;
+*/
 
         fflush(stdin);
         system("cls");
@@ -639,7 +626,7 @@ int main()
 
     }
 
-    al_rest(15.0);
+
     al_destroy_bitmap(img);
     al_destroy_display(display);
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
