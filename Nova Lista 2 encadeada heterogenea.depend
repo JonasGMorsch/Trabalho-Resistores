@@ -17,7 +17,14 @@
 	<locale.h>
 	<ctype.h>
 
-1457027409 source:d:\onedrive\ifsc\daniel - programação ii\trabalhos\trabalho resistores\main.c
+1457027368 source:d:\onedrive\ifsc\daniel - programação ii\trabalhos\trabalho resistores\main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<locale.h>
+	<ctype.h>
+
+1457703494 source:d:\onedrive\ifsc\daniel - programação ii\trabalhos\trabalho resistores - copy\main.c
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
