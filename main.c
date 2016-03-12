@@ -4,16 +4,6 @@
 #include <locale.h>
 #include <ctype.h>
 
-struct resistores
-{
-    float resistencia;
-    int serie;
-    float tolerancia;
-    float potencia;
-    int quantidade;
-};
-typedef struct resistores Resistores;
-
 struct serie
 {
     struct serie *esquerda;
@@ -50,31 +40,22 @@ struct cabecalho
 };
 typedef struct cabecalho Estruturadocabecalho;
 
-struct lista
-{
-    struct lista* listaanterior;
-    struct resistores* ponteirodedados;
-    struct lista* listaprox;
-};
-typedef struct lista Lista;
 
-void inic_cabecalho(Estruturadocabecalho* Cabecalho)
-{
-    Cabecalho->nelementos = 0;  //inicializando
-    Cabecalho->iniciodecabecalho = NULL;   //inicializando
-    Cabecalho->fimdecabecalho = NULL;      //inicializando
-}
-
+/// //////////////////////////////////////////////////////////INICIO INSERSÃO ADIÇÃO REMOÇÁO RESISTORES////////////////////////////////////
 void inserir_resistencia(Resistencia**Arvore, float valor_resistencia ,int quantidade_resistores,int soma)
 {
     if(*Arvore == NULL)
     {
-        Resistencia* ResistenciaN = (Resistencia*) malloc(sizeof(Resistencia));
-        ResistenciaN->esquerda = NULL;
-        ResistenciaN->direita = NULL;
-        ResistenciaN->valor_resistencia = valor_resistencia;
-        ResistenciaN->quantidade_resistores=quantidade_resistores;
-        *Arvore=ResistenciaN;
+        if(soma==1)
+        {
+            Resistencia* ResistenciaN = (Resistencia*) malloc(sizeof(Resistencia));
+            ResistenciaN->esquerda = NULL;
+            ResistenciaN->direita = NULL;
+            ResistenciaN->valor_resistencia = valor_resistencia;
+            ResistenciaN->quantidade_resistores=quantidade_resistores;
+            *Arvore=ResistenciaN;
+            printf("\n *Novo resistor gerado com sucesso* \n");
+        }
     }
     else
     {
@@ -84,16 +65,31 @@ void inserir_resistencia(Resistencia**Arvore, float valor_resistencia ,int quant
         if(valor_resistencia > (*Arvore)->valor_resistencia)
             inserir_resistencia(&(*Arvore)->direita, valor_resistencia,quantidade_resistores,soma);
 
-        if(soma==1)
-            if(valor_resistencia == (*Arvore)->valor_resistencia)
+        if(valor_resistencia == (*Arvore)->valor_resistencia)
+        {
+            if(soma==0)
+            {
+                if((*Arvore)->quantidade_resistores<quantidade_resistores)
+                    printf("\n *A quantidate a ser retirada é maior do que a quantidate em estoque* \n");
+                else
+                    (*Arvore)->quantidade_resistores-=quantidade_resistores;
+                    printf("\n *Resistor retirado com sucesso* \n");
+            }
+            else if(soma==1)
+            {
+                if((*Arvore)->quantidade_resistores==-1)
+                    (*Arvore)->quantidade_resistores=0;
                 (*Arvore)->quantidade_resistores+=quantidade_resistores;
-
-         if(soma==0)
-            if(valor_resistencia == (*Arvore)->valor_resistencia)
-                (*Arvore)->quantidade_resistores-=quantidade_resistores;
+                printf("\n *Resistor adicionado com sucesso* \n");
+            }
+            else if(soma==2)
+            {
+                (*Arvore)->quantidade_resistores=-1;
+                printf("\n *Resistor removido com sucesso* \n");
+            }
+        }
     }
 }
-
 void inserir_potencia(Potencia**Arvore, float potencia_resistor, float valor_resistencia ,int quantidade_resistores,int soma)
 {
     if(*Arvore == NULL)
@@ -118,7 +114,6 @@ void inserir_potencia(Potencia**Arvore, float potencia_resistor, float valor_res
             inserir_resistencia(&(*Arvore)->resistencia,valor_resistencia,quantidade_resistores,soma);
     }
 }
-
 void inserir(Serie**Arvore, int numero_serie,float potencia_resistor,float valor_resistencia ,int quantidade_resistores,int soma)
 {
     if(*Arvore == NULL)
@@ -144,16 +139,17 @@ void inserir(Serie**Arvore, int numero_serie,float potencia_resistor,float valor
             inserir_potencia(&(*Arvore)->potencia,potencia_resistor,valor_resistencia,quantidade_resistores,soma);
     }
 }
+/// //////////////////////////////////////////////////////////FIM INSERSÃO ADIÇÃO REMOÇÁO RESISTORES////////////////////////////////////
 
-
-/// //////////////////////////////INICIO EXPORTA TXT /////////////////////////////////
+/// /////////////////////////////////////INICIO EXPORTA TXT ///////////////////////////////////////////
 void Exporta_Arquivo_3(Resistencia*Arvore,int numero_serie,float potencia_resistor,FILE * fp)
 {
     if(Arvore != NULL)
     {
         Exporta_Arquivo_3(Arvore->esquerda,numero_serie,potencia_resistor,fp);
-        printf(" Série: E%d\tPotência:%5.2f\tResistencia:%9.1f\tQuantidade:%6.d\n",numero_serie, potencia_resistor,Arvore->valor_resistencia,Arvore->quantidade_resistores);
-        fprintf(fp,"%d\t %5.2f %12.1f %6.d\n",numero_serie, potencia_resistor, Arvore->valor_resistencia, Arvore->quantidade_resistores);
+        //printf(" Série: E%d\tPotência:%5.2f\tResistencia:%9.1f\tQuantidade:%6d\n",numero_serie, potencia_resistor,Arvore->valor_resistencia,Arvore->quantidade_resistores);
+        if(Arvore->quantidade_resistores>0)
+            fprintf(fp,"%d\t %5.2f %12.1f %6d\n",numero_serie, potencia_resistor, Arvore->valor_resistencia, Arvore->quantidade_resistores);
         Exporta_Arquivo_3(Arvore->direita,numero_serie,potencia_resistor,fp);
     }
 }
@@ -175,20 +171,21 @@ void Exporta_Arquivo(Serie*Arvore,FILE * fp)
         Exporta_Arquivo(Arvore->direita,fp);
     }
 }
-/// //////////////////////////////FIM EXPORTA TXT /////////////////////////////////
+/// ///////////////////////////////////////FIM EXPORTA TXT ///////////////////////////////////////////
+
+/// ///////////////////////////////////////////////////INICIO BUSCA RESISTORES////////////////////////////////////////////////////
 
 void Busca_resitencia(Resistencia*Arvore,int numero_serie,float potencia_resistor,float valor_resistencia ,int quantidade_resistores)
 {
     if(Arvore != NULL)
     {
         Busca_resitencia(Arvore->esquerda,numero_serie,potencia_resistor,valor_resistencia,quantidade_resistores);
-        if((valor_resistencia == Arvore->valor_resistencia && quantidade_resistores ==0) || (quantidade_resistores==Arvore->quantidade_resistores && valor_resistencia ==0) || (valor_resistencia==0 &&quantidade_resistores ==0) || (valor_resistencia==Arvore->valor_resistencia && quantidade_resistores==Arvore->quantidade_resistores))
-            printf("Série: E%d\tPotência:%5.2f\tResistencia:%9.1f\tQuantidade:%6.d\n",numero_serie, potencia_resistor,Arvore->valor_resistencia,Arvore->quantidade_resistores);
+        if(((valor_resistencia == Arvore->valor_resistencia && quantidade_resistores ==0) || (quantidade_resistores==Arvore->quantidade_resistores && valor_resistencia ==0) || (valor_resistencia==0 &&quantidade_resistores ==0) || (valor_resistencia==Arvore->valor_resistencia && quantidade_resistores==Arvore->quantidade_resistores)) && (Arvore->quantidade_resistores>=0))
+            printf("Série: E%d\tPotência:%5.2f\tResistencia:%9.1f\tQuantidade:%6d\n",numero_serie, potencia_resistor,Arvore->valor_resistencia,Arvore->quantidade_resistores);
 
         Busca_resitencia(Arvore->direita,numero_serie,potencia_resistor,valor_resistencia,quantidade_resistores);
     }
 }
-
 void Busca_potencia(Potencia*Arvore,int numero_serie,float potencia_resistor,float valor_resistencia ,int quantidade_resistores)
 {
     if(Arvore != NULL)
@@ -199,7 +196,6 @@ void Busca_potencia(Potencia*Arvore,int numero_serie,float potencia_resistor,flo
         Busca_potencia(Arvore->direita,numero_serie,potencia_resistor,valor_resistencia,quantidade_resistores);
     }
 }
-
 void Busca_serie(Serie*Arvore, int numero_serie,float potencia_resistor,float valor_resistencia ,int quantidade_resistores)
 {
     if(Arvore != NULL)
@@ -213,35 +209,7 @@ void Busca_serie(Serie*Arvore, int numero_serie,float potencia_resistor,float va
         Busca_serie(Arvore->direita,numero_serie,potencia_resistor,valor_resistencia,quantidade_resistores);
     }
 }
-
-
-void inserefim (Estruturadocabecalho* Cabecalho,float r,int s,float t,float w,int q)
-{
-    Lista* ListaN = (Lista*) malloc(sizeof(Lista)); //lista dupla
-    Resistores* ResistoresN = (Resistores*) malloc(sizeof(Resistores));  //banco de bados
-
-    ListaN->ponteirodedados = ResistoresN;
-
-    ListaN->ponteirodedados->resistencia=r;
-    ListaN->ponteirodedados->serie=s;
-    ListaN->ponteirodedados->tolerancia=t;
-    ListaN->ponteirodedados->potencia=w;
-    ListaN->ponteirodedados->quantidade= q;
-
-    if (Cabecalho->iniciodecabecalho == NULL)
-    {
-        Cabecalho->iniciodecabecalho = ListaN;
-        ListaN->listaanterior = NULL;
-    }
-    else
-    {
-        Cabecalho->fimdecabecalho->listaprox=ListaN;
-        ListaN->listaanterior = Cabecalho->fimdecabecalho;
-    }
-    Cabecalho->fimdecabecalho = ListaN;
-    ListaN->listaprox = NULL;
-    Cabecalho->nelementos++; // o numero de elemenos cresceu
-}
+/// ///////////////////////////////////////////////////INICIO BUSCA RESISTORES////////////////////////////////////////////////////
 
 void adiciona_resistor(Serie*Arvore)
 {
@@ -252,8 +220,8 @@ void adiciona_resistor(Serie*Arvore)
     scanf("%f",&resitencia);
     printf(" Série:");
     scanf("%d",&serie);
-    printf(" Tolerância:");
-    scanf("%f",&tolerancia);
+    //printf(" Tolerância:");
+   // scanf("%f",&tolerancia);
     printf(" Potência:");
     scanf("%f",&potencia);
     printf(" Quantidade:");
@@ -313,15 +281,10 @@ void adiciona_resistor(Serie*Arvore)
             else if (tolerancia==1)
                 serie=96;
 
-
             ///   ////////
             if(i==0)
-                inserir(&Arvore,serie,potencia,resitencia,quantidade,0);
-
-
+                inserir(&Arvore,serie,potencia,resitencia,quantidade,1);
             /// //////////
-
-
         }
         else
             printf(" Esta série não existe\n Este resistor não pode ser adicionado\n");
@@ -330,9 +293,55 @@ void adiciona_resistor(Serie*Arvore)
         printf(" A adição do resistor foi cancelada\n");
 }
 
+void apaga_resistor(Serie*Arvore)
+{
+    int/* i=0,*/serie=0,quantidade=0;
+    float resitencia=0,potencia=0;
+    char resposta;
+
+    printf("\n Entre com os valores de: \n\n Resistência:");
+    scanf("%f",&resitencia);
+    printf(" Série:");
+    scanf("%d",&serie);
+    printf(" Potência:");
+    scanf("%f",&potencia);
+    fflush(stdin);
+    printf("\n Os Valores estão corretos? (S/N)");
+    scanf("%c",&resposta);
+
+    if (resposta=='S' || resposta=='s')
+        inserir(&Arvore,serie,potencia,resitencia,quantidade,2);
+    else
+        printf("\n *A operação foi cancelada*\n");
+}
+
+void retira_resistor(Serie*Arvore)
+{
+    int/* i=0,*/serie=0,quantidade=0;
+    float resitencia=0,potencia=0;
+    char resposta;
+
+    printf("\n Entre com os valores de: \n\n Resistência:");
+    scanf("%f",&resitencia);
+    printf(" Série:");
+    scanf("%d",&serie);
+    printf(" Potência:");
+    scanf("%f",&potencia);
+    printf("\n Qual será a quantidade retirada?\n ");
+    scanf("%d",&quantidade);
+    fflush(stdin);
+    printf("\n Os Valores estão corretos? (S/N)");
+    scanf("%c",&resposta);
+
+    if (resposta=='S' || resposta=='s')
+        inserir(&Arvore,serie,potencia,resitencia,quantidade,0);
+    else
+        printf("\n *A retirada de resistores foi cancelada*\n");
+}
+
 void busca_resistor(Serie*Arvore)
 {
-    int i=0,serie=0,quantidade=0;
+    int/* i=0,*/serie=0,quantidade=0;
     float resitencia=0,potencia=0;
     char sa[10];
     char sb[10];
@@ -356,7 +365,6 @@ void busca_resistor(Serie*Arvore)
     Busca_serie(Arvore,serie,potencia,resitencia,quantidade);
 
 }
-
 const char NOME_ARQ[] = "resistores.txt";
 const char NOME_ARQ2[] = "resistores_arvore.txt";
 int main()
@@ -364,32 +372,28 @@ int main()
     setlocale(LC_CTYPE,"portuguese");
     int p=3,n;
     int serie=0,quantidade=0;
-    float resitencia=0,potencia=0,tolerancia=0;
-    //Lista* ListaAux;
+    float resitencia=0,potencia=0/*,tolerancia=0*/;
     FILE *fp;
-
+    FILE *fs;
 
     Serie*Arvore;
     Arvore = NULL;
 
-    fp = fopen(NOME_ARQ,"r");
+    fp = fopen(NOME_ARQ2,"r");
     if (fp == NULL)
     {
-        printf("Erro ao abrir arquivo %s.\n", NOME_ARQ);
-        exit(1);
+        printf("Erro ao abrir arquivo %s.\n", NOME_ARQ2);
+        return 0;
     }
 
     while(1)
     {
-        n=fscanf(fp,"%f %d %f %f %d",&resitencia,&serie,&tolerancia,&potencia,&quantidade);
-        //n=fscanf(fp,"%d %f %f %d",&serie,&potencia,&resitencia,&quantidade);
+        n=fscanf(fp,"%d %f %f %d",&serie,&potencia,&resitencia,&quantidade);
         if (n==EOF)
             break;
-        inserir(&Arvore,serie,potencia,resitencia,quantidade,0);
+        inserir(&Arvore,serie,potencia,resitencia,quantidade,1);
     }
-
-    FILE *fs;
-
+    fclose(fp);
 
     while(p!=8)
     {
@@ -415,12 +419,12 @@ int main()
             system("cls");
             break;
         case 4:
-            ///apaga_resistor(Cabecalho);
+            apaga_resistor(Arvore);
             system("pause");
             system("cls");
             break;
         case 5:
-            ///retira_resistor(Cabecalho);
+            retira_resistor(Arvore);
             system("pause");
             system("cls");
             break;
@@ -429,13 +433,11 @@ int main()
             fs = fopen(NOME_ARQ2,"w+");
             Exporta_Arquivo(Arvore,fs);
             fclose(fs);
-            //system("pause");
-            //system("cls");
             printf("*As alterações foram salvas*\n");
             return 0;
         case 8:
             printf("FIM!");
-            break;
+            return 0;
         }
     }
     return 0;
