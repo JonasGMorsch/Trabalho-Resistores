@@ -24,7 +24,7 @@
 	<locale.h>
 	<ctype.h>
 
-1457532832 source:c:\users\rafa\desktop\trabalho resistores - copy - copy\main.c
+1457790551 source:c:\users\rafa\desktop\trabalho resistores - copy - copy\main.c
 	<allegro5/allegro.h>
 	<allegro5/allegro_primitives.h>
 	<allegro5/allegro_image.h>
@@ -32,23 +32,13 @@
 	<allegro5/allegro_font.h>
 	<allegro5/allegro_native_dialog.h>
 	<allegro5/allegro_ttf.h>
-	<stdio.h>
-	<stdlib.h>
-	<string.h>
-	<locale.h>
-	<ctype.h>
-
-1457532832 source:c:\users\jonas\desktop\trabalho resistores - copy - copy\main.c
-	<allegro5/allegro.h>
-	<allegro5/allegro_primitives.h>
+	<allegro5/bitmap.h>
 	<allegro5/allegro_image.h>
-	<allegro5/allegro_opengl.h>
-	<allegro5/allegro_font.h>
-	<allegro5/allegro_native_dialog.h>
-	<allegro5/allegro_ttf.h>
+	<allegro5/allegro_acodec.h>
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
 	<locale.h>
 	<ctype.h>
+	<stdbool.h>
 

@@ -5,18 +5,33 @@
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_native_dialog.h>
 #include <allegro5/allegro_ttf.h>
+#include <allegro5/bitmap.h>
+#include <allegro5/allegro_image.h>
+#include <allegro5/allegro_acodec.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <locale.h>
 #include <ctype.h>
+#include <stdbool.h>
 
 const int SCREEN_W = 800;
 const int SCREEN_H = 600;
-
 enum teclas {key_1, key_2, key_3, key_4, key_5, key_6, key_7,key_esc,total_teclas};
 int Keys[total_teclas];
 bool doexit = false;
+bool doimprime = false;
+
+ALLEGRO_DISPLAY *display = NULL;
+ALLEGRO_FONT *font1 = NULL;
+ALLEGRO_FONT *font2 = NULL;
+ALLEGRO_FONT *font3 = NULL;
+ALLEGRO_BITMAP  *img   = NULL;
+ALLEGRO_BITMAP  *imagem1  = NULL;
+ALLEGRO_BITMAP *imagem2 = NULL;
+ALLEGRO_BITMAP *imagem3 = NULL;
+ALLEGRO_EVENT_QUEUE *event_queue = NULL;
+char str[17];
 struct cabecalho
 {
     struct lista* iniciodecabecalho;
@@ -133,12 +148,6 @@ void insere_numero (int v,Estruturadocabecalho* Cabecalho,int r,int s,int w,int 
         }
     }
     Cabecalho->nelementos++; // o numero de elemenos cresceu
-}
-void imprime_todos (Estruturadocabecalho* Cabecalho)
-{
-    Lista* ListaAux;
-    for (ListaAux=Cabecalho->iniciodecabecalho; ListaAux != NULL; ListaAux = ListaAux->listaprox)
-        printf("Resis.= %8.1f  Serie.= E%.2d\tToler. = %5.2f Poten.= %5.2f  Quant.= %.4d  \n", ListaAux->ponteirodedados->resistencia, ListaAux->ponteirodedados->serie,ListaAux->ponteirodedados->tolerancia, ListaAux->ponteirodedados->potencia, ListaAux->ponteirodedados->quantidade);
 }
 
 void imprime_numero (int v, Estruturadocabecalho* Cabecalho)
@@ -434,62 +443,83 @@ void retira_resistor(Estruturadocabecalho* Cabecalho)
 }
 
 const char NOME_ARQ[] = "resistores.txt";
-int main()
+
+bool inicializar()
 {
-//////////////////ALLEGRO ////////////////////////////////////////////////////////////////////
-    ALLEGRO_DISPLAY *display = NULL;
-    ALLEGRO_FONT *font1 = NULL;
-    ALLEGRO_FONT *font2 = NULL;
-    ALLEGRO_BITMAP  *img   = NULL;
-    ALLEGRO_BITMAP  *imagem1  = NULL;
-    ALLEGRO_EVENT_QUEUE *event_queue = NULL;
-
     al_init();
-
     display = al_create_display(SCREEN_W, SCREEN_H);
     al_clear_to_color(al_map_rgb(168,168,168));
     al_set_window_title(display, "Base de dados de Resistores");
     al_init_image_addon();
-    al_init_font_addon(); // initialize the font addon
-    al_init_ttf_addon();// initialize the ttf (True Type Font) addon
+    al_init_font_addon();
+    al_init_ttf_addon();
     al_install_mouse();
     al_install_keyboard();
     img = al_load_bitmap("res2.png");
     imagem1 = al_load_bitmap("fundo.png");
-    font1 = al_load_ttf_font("pirulen.TTF",15,0 );
-    font2 = al_load_ttf_font("pirulen.TTF",20,0 );
+    imagem2 = al_load_bitmap("opcoes.png");
+    imagem3 = al_load_bitmap("ifsc2.png");
+    font1 = al_load_ttf_font("arial.TTF",18,15);
+    font2 = al_load_ttf_font("arial.TTF",25,15 );
+    font3 = al_load_ttf_font("arial.TTF",20,15 );
     event_queue = al_create_event_queue();
     al_register_event_source(event_queue, al_get_display_event_source(display));
     al_register_event_source(event_queue, al_get_keyboard_event_source());
-    al_register_event_source(event_queue, al_get_mouse_event_source());
-    al_draw_bitmap(img, 1, 1, 1);
+    ///al_register_event_source(event_queue, al_get_mouse_event_source());
+    return true;
+}
 
-    // Exemplo de impressão de valores variáveis
+void manipular_entrada(ALLEGRO_EVENT ev)
+{
+    if (strlen(str) <= 16)
+    {
+        char temp[] = {ev.keyboard.unichar, '\0'};
+        if (ev.keyboard.unichar == ' ')
+        {
+            strcat(str, temp);
+        }
+        else if (ev.keyboard.unichar >= '0' &&
+                 ev.keyboard.unichar <= '9')
+        {
+            strcat(str, temp);
+        }
+        else if (ev.keyboard.unichar >= 'A' &&
+                 ev.keyboard.unichar <= 'Z')
+        {
+            strcat(str, temp);
+        }
+        else if (ev.keyboard.unichar >= 'a' &&
+                 ev.keyboard.unichar <= 'z')
+        {
+            strcat(str, temp);
+        }
+    }
+
+    if (ev.keyboard.keycode == ALLEGRO_KEY_BACKSPACE && strlen(str) != 0)
+    {
+        str[strlen(str) - 1] = '\0';
+    }
+
+    if (strlen(str) > 0)
+    {
+        al_draw_textf(font1, al_map_rgb(0, 0, 0), 430, 350, ALLEGRO_ALIGN_CENTRE, "%c",str);
+    }
+}
+
+int main()
+{
+    inicializar();
     char *texto = "BASE DE DADOS DE RESISTORES";
-    char *texto1 = "Consultar Resistores";
-    char *texto2 = "Adicionar Resistores";
-    char *texto3 = "Buscar Resistores";
-    char *texto4 = "Apagar Resistores";
-    char *texto5 = "Retirar Resistores";
-    char *texto6 = "Salvar e Sair";
-    char *texto7 = "Sair";
-    al_draw_textf(font2, al_map_rgb(0, 0, 0), 510, 10, ALLEGRO_ALIGN_CENTRE, "%s", texto);
-    al_draw_bitmap(imagem1,390,90,0);
-    al_draw_textf(font1, al_map_rgb(0, 0, 0), 510, 100, ALLEGRO_ALIGN_CENTRE, "%s", texto1);
-    al_draw_bitmap(imagem1,390,130,0);
-    al_draw_textf(font1, al_map_rgb(0, 0, 0), 510, 140, ALLEGRO_ALIGN_CENTRE, "%s", texto2);
-    al_draw_bitmap(imagem1,390,170,0);
-    al_draw_textf(font1, al_map_rgb(0, 0, 0), 510, 180, ALLEGRO_ALIGN_CENTRE, "%s", texto3);
-    al_draw_bitmap(imagem1,390,210,0);
-    al_draw_textf(font1, al_map_rgb(0, 0, 0), 510, 220, ALLEGRO_ALIGN_CENTRE, "%s", texto4);
-    al_draw_bitmap(imagem1,390,250,0);
-    al_draw_textf(font1, al_map_rgb(0, 0, 0), 510, 260, ALLEGRO_ALIGN_CENTRE, "%s", texto5);
-    al_draw_bitmap(imagem1,390,290,0);
-    al_draw_textf(font1, al_map_rgb(0, 0, 0), 510, 300, ALLEGRO_ALIGN_CENTRE, "%s", texto6);
-    al_draw_bitmap(imagem1,390,330,0);
-    al_draw_textf(font1, al_map_rgb(0, 0, 0), 510, 340, ALLEGRO_ALIGN_CENTRE, "%s", texto7);
-
-    al_flip_display();
+    char *texto1 = "1. Consultar Resistores";
+    char *texto2 = "2. Adicionar Resistores";
+    char *texto3 = "3. Buscar Resistores";
+    char *texto4 = "4. Apagar Resistores";
+    char *texto5 = "5. Retirar Resistores";
+    char *texto6 = "6. Salvar e Sair";
+    char *texto7 = "7. Sair";
+    char *texto8 = "Aperte ESC para voltar ao Menu.";
+    char *texto9 = "Instituto Federal";
+    char *texto10 = "Santa Catarina";
 
     setlocale(LC_CTYPE,"portuguese");
     int p=3, n;
@@ -517,85 +547,133 @@ int main()
 
     while(!doexit)
     {
-        //printf("aqui no while");
+        while(!doimprime)
+        {
+            al_clear_to_color(al_map_rgb(168,168,168));
+            al_draw_bitmap(img, 1, 1, 1);
+            al_draw_bitmap(imagem3, 1,430, 0);
+            al_draw_textf(font3, al_map_rgb(0, 0, 0), 140, 530, ALLEGRO_ALIGN_LEFT, "%s", texto9);
+            al_draw_textf(font3, al_map_rgb(0, 0, 0), 140, 557, ALLEGRO_ALIGN_LEFT, "%s", texto10);
+            al_draw_textf(font2, al_map_rgb(0, 0, 0), 510, 30, ALLEGRO_ALIGN_CENTRE, "%s", texto);
+            al_draw_bitmap(imagem1,390,90,0);
+            al_draw_textf(font1, al_map_rgb(0, 0, 0), 510, 100, ALLEGRO_ALIGN_CENTRE, "%s", texto1);
+            al_draw_bitmap(imagem1,390,130,0);
+            al_draw_textf(font1, al_map_rgb(0, 0, 0), 510, 140, ALLEGRO_ALIGN_CENTRE, "%s", texto2);
+            al_draw_bitmap(imagem1,390,170,0);
+            al_draw_textf(font1, al_map_rgb(0, 0, 0), 510, 180, ALLEGRO_ALIGN_CENTRE, "%s", texto3);
+            al_draw_bitmap(imagem1,390,210,0);
+            al_draw_textf(font1, al_map_rgb(0, 0, 0), 510, 220, ALLEGRO_ALIGN_CENTRE, "%s", texto4);
+            al_draw_bitmap(imagem1,390,250,0);
+            al_draw_textf(font1, al_map_rgb(0, 0, 0), 510, 260, ALLEGRO_ALIGN_CENTRE, "%s", texto5);
+            al_draw_bitmap(imagem1,390,290,0);
+            al_draw_textf(font1, al_map_rgb(0, 0, 0), 510, 300, ALLEGRO_ALIGN_CENTRE, "%s", texto6);
+            al_draw_bitmap(imagem1,390,330,0);
+            al_draw_textf(font1, al_map_rgb(0, 0, 0), 510, 340, ALLEGRO_ALIGN_CENTRE, "%s", texto7);
+            al_flip_display();
+            doimprime=true;
+        }
         fflush(stdin);
-        system("cls");
+        ///system("cls");
         ALLEGRO_EVENT ev;
         al_wait_for_event(event_queue, &ev);
 
-        if(ev.type == ALLEGRO_EVENT_KEY_DOWN)
+        if (event_queue && ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
+        {
+            doexit = true;
+        }
+        if(ev.type == ALLEGRO_EVENT_KEY_CHAR)
         {
             switch(ev.keyboard.keycode)
             {
-            case ALLEGRO_KEY_1:
-            case ALLEGRO_KEY_PAD_1:
-                ordernar(Cabecalho);
-                imprime_todos(Cabecalho);
-                system("pause");
-                system("cls");
+                int j;
+
+            case ALLEGRO_KEY_ESCAPE:
+                doimprime=false;
                 break;
 
+            case ALLEGRO_KEY_1:
+            case ALLEGRO_KEY_PAD_1:
+                al_clear_to_color(al_map_rgb(168,168,168));
+                al_draw_textf(font1, al_map_rgb(0, 0, 0), 400, 550, ALLEGRO_ALIGN_CENTRE, "%s", texto8);
+                al_draw_textf(font2, al_map_rgb(0, 0, 0), 430, 50, ALLEGRO_ALIGN_CENTRE, "%s", texto1);
+                ordernar(Cabecalho);
+                Lista* ListaAux;
+                j = 100;
+                for (ListaAux=Cabecalho->iniciodecabecalho; ListaAux != NULL; ListaAux = ListaAux->listaprox)
+                {
+                    al_draw_textf(font1, al_map_rgb(0, 0, 0), 400, j, ALLEGRO_ALIGN_CENTRE, "Resis.= %8.1f  Serie.= E%.2d\tToler. = %5.2f Poten.= %5.2f  Quant.= %.4d  \n", ListaAux->ponteirodedados->resistencia, ListaAux->ponteirodedados->serie,ListaAux->ponteirodedados->tolerancia, ListaAux->ponteirodedados->potencia, ListaAux->ponteirodedados->quantidade);
+                    j=j+20;
+                    if(j==600)
+                        break;
+                }
+                al_flip_display();
+                system("cls");
                 break;
             case ALLEGRO_KEY_2:
             case ALLEGRO_KEY_PAD_2:
-                adiciona_resistor(Cabecalho);
-                system("pause");
-                system("cls");
+                al_clear_to_color(al_map_rgb(168,168,168));
+                al_draw_textf(font1, al_map_rgb(0, 0, 0), 400, 550, ALLEGRO_ALIGN_CENTRE, "%s", texto8);
+                manipular_entrada(ev);
+                al_flip_display();
+                /*adiciona_resistor(Cabecalho);
+                //system("pause");
+                system("cls");*/
 
                 break;
             case ALLEGRO_KEY_3:
             case ALLEGRO_KEY_PAD_3:
-                busca_resistor(Cabecalho);
-                system("pause");
+                al_clear_to_color(al_map_rgb(168,168,168));
+                al_draw_textf(font1, al_map_rgb(0, 0, 0), 400, 550, ALLEGRO_ALIGN_CENTRE, "%s", texto8);
+                al_flip_display();
+                //busca_resistor(Cabecalho);
+                //system("pause");
                 system("cls");
 
                 break;
             case ALLEGRO_KEY_4:
             case ALLEGRO_KEY_PAD_4:
-                apaga_resistor(Cabecalho);
-                system("pause");
+                al_clear_to_color(al_map_rgb(168,168,168));
+                al_draw_textf(font1, al_map_rgb(0, 0, 0), 400, 550, ALLEGRO_ALIGN_CENTRE, "%s", texto8);
+                al_flip_display();
+                //apaga_resistor(Cabecalho);
+                //system("pause");
                 system("cls");
-                break;
 
                 break;
             case ALLEGRO_KEY_5:
             case ALLEGRO_KEY_PAD_5:
-                retira_resistor(Cabecalho);
-                system("pause");
+                al_clear_to_color(al_map_rgb(168,168,168));
+                al_draw_textf(font1, al_map_rgb(0, 0, 0), 400, 550, ALLEGRO_ALIGN_CENTRE, "%s", texto8);
+                al_flip_display();
+                //retira_resistor(Cabecalho);
+                //system("pause");
                 system("cls");
                 break;
 
 
             case ALLEGRO_KEY_6:
             case ALLEGRO_KEY_PAD_6:
+                al_clear_to_color(al_map_rgb(168,168,168));
                 fp = fopen(NOME_ARQ,"w");
                 for (ListaAux=Cabecalho->iniciodecabecalho; ListaAux != NULL; ListaAux = ListaAux->listaprox)
                     fprintf(fp,"%8.1f\t%.2d\t%5.2f\t%5.2f\t%.4d \n", ListaAux->ponteirodedados->resistencia, ListaAux->ponteirodedados->serie,ListaAux->ponteirodedados->tolerancia, ListaAux->ponteirodedados->potencia, ListaAux->ponteirodedados->quantidade);
                 //system("pause");
                 system("cls");
-                printf("*As alterações foram salvas*\n");
+                al_draw_textf(font1, al_map_rgb(0, 0, 0), 400, 250, ALLEGRO_ALIGN_CENTRE, "*As alteracoes foram salvas*");
+                al_flip_display();
+                al_rest(1.3);
                 return 0;
-
                 break;
             case ALLEGRO_KEY_7:
             case ALLEGRO_KEY_PAD_7:
                 printf("FIM!");
                 doexit = true;
-
                 break;
-            case ALLEGRO_KEY_ESCAPE:
-                printf("FIM!");
-                doexit = true;
-
-                break;
-
-
             }
         }
     }
 
     al_destroy_bitmap(img);
     al_destroy_display(display);
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
     return 0;
 }
