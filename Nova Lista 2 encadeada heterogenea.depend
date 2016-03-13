@@ -24,7 +24,21 @@
 	<locale.h>
 	<ctype.h>
 
-1457790551 source:c:\users\rafa\desktop\trabalho resistores - copy - copy\main.c
+1457703494 source:d:\onedrive\ifsc\daniel - programação ii\trabalhos\trabalho resistores - copy\main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<locale.h>
+	<ctype.h>
+
+1457796660 source:d:\github\trabalho-resistores\main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<locale.h>
+	<ctype.h>
+
+1457899762 source:c:\users\rafa\desktop\trabalho-resistores\main.c
 	<allegro5/allegro.h>
 	<allegro5/allegro_primitives.h>
 	<allegro5/allegro_image.h>

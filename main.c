@@ -15,12 +15,29 @@
 #include <ctype.h>
 #include <stdbool.h>
 
+//#include <stdarg.h> ///
+
 const int SCREEN_W = 800;
 const int SCREEN_H = 600;
 enum teclas {key_1, key_2, key_3, key_4, key_5, key_6, key_7,key_esc,total_teclas};
 int Keys[total_teclas];
+int j=100;
 bool doexit = false;
 bool doimprime = false;
+
+char str[17];
+char *texto = "BASE DE DADOS DE RESISTORES";
+char *texto1 = "1. Consultar Resistores";
+char *texto2 = "2. Adicionar Resistores";
+char *texto3 = "3. Buscar Resistores";
+char *texto4 = "4. Apagar Resistores";
+char *texto5 = "5. Retirar Resistores";
+char *texto6 = "6. Salvar e Sair";
+char *texto7 = "7. Sair";
+char *texto8 = "Aperte ESC para voltar ao Menu.";
+char *texto9 = "Instituto Federal";
+char *texto10 = "Santa Catarina";
+
 
 ALLEGRO_DISPLAY *display = NULL;
 ALLEGRO_FONT *font1 = NULL;
@@ -31,7 +48,37 @@ ALLEGRO_BITMAP  *imagem1  = NULL;
 ALLEGRO_BITMAP *imagem2 = NULL;
 ALLEGRO_BITMAP *imagem3 = NULL;
 ALLEGRO_EVENT_QUEUE *event_queue = NULL;
-char str[17];
+ALLEGRO_COLOR c;
+
+
+struct serie
+{
+    struct serie *esquerda;
+    int numero_serie;
+    float valor_tolerancia;
+    struct potencia* potencia;
+    struct serie *direita;
+};
+typedef struct serie Serie;
+
+struct potencia
+{
+    struct potencia *esquerda;
+    float potencia_resistor;
+    struct resistencia* resistencia;
+    struct potencia *direita;
+};
+typedef struct potencia Potencia;
+
+struct resistencia
+{
+    struct resistencia *esquerda;
+    float valor_resistencia;
+    int quantidade_resistores;
+    struct resistencia *direita;
+};
+typedef struct resistencia Resistencia;
+
 struct cabecalho
 {
     struct lista* iniciodecabecalho;
@@ -40,409 +87,182 @@ struct cabecalho
 };
 typedef struct cabecalho Estruturadocabecalho;
 
-struct lista
+
+/// //////////////////////////////////////////////////////////INICIO INSERSÃO ADIÇÃO REMOÇÁO RESISTORES////////////////////////////////////
+void inserir_resistencia(Resistencia**Arvore, float valor_resistencia,int quantidade_resistores,int soma)
 {
-    struct lista* listaanterior;
-    struct resistores* ponteirodedados;
-    struct lista* listaprox;
-};
-typedef struct lista Lista;
-
-struct resistores
-{
-    float resistencia;
-    int serie;
-    float tolerancia;
-    float potencia;
-    int quantidade;
-};
-typedef struct resistores Resistores;
-
-void inic_cabecalho(Estruturadocabecalho* Cabecalho)
-{
-    Cabecalho->nelementos = 0;  //inicializando
-    Cabecalho->iniciodecabecalho = NULL;   //inicializando
-    Cabecalho->fimdecabecalho = NULL;      //inicializando
-}
-
-void inserefim (Estruturadocabecalho* Cabecalho,float r,int s,float t,float w,int q)
-{
-    Lista* ListaN = (Lista*) malloc(sizeof(Lista)); //lista dupla
-    Resistores* ResistoresN = (Resistores*) malloc(sizeof(Resistores));  //banco de bados
-
-    ListaN->ponteirodedados = ResistoresN;
-
-    ListaN->ponteirodedados->resistencia=r;
-    ListaN->ponteirodedados->serie=s;
-    ListaN->ponteirodedados->tolerancia=t;
-    ListaN->ponteirodedados->potencia=w;
-    ListaN->ponteirodedados->quantidade= q;
-
-    if (Cabecalho->iniciodecabecalho == NULL)
+    if(*Arvore == NULL)
     {
-        Cabecalho->iniciodecabecalho = ListaN;
-        ListaN->listaanterior = NULL;
+        if(soma==1)
+        {
+            Resistencia* ResistenciaN = (Resistencia*) malloc(sizeof(Resistencia));
+            ResistenciaN->esquerda = NULL;
+            ResistenciaN->direita = NULL;
+            ResistenciaN->valor_resistencia = valor_resistencia;
+            ResistenciaN->quantidade_resistores=quantidade_resistores;
+            *Arvore=ResistenciaN;
+            printf("\n *Novo resistor gerado com sucesso* \n");
+        }
     }
     else
     {
-        Cabecalho->fimdecabecalho->listaprox=ListaN;
-        ListaN->listaanterior = Cabecalho->fimdecabecalho;
-    }
-    Cabecalho->fimdecabecalho = ListaN;
-    ListaN->listaprox = NULL;
-    Cabecalho->nelementos++; // o numero de elemenos cresceu
-}
+        if(valor_resistencia < (*Arvore)->valor_resistencia)
+            inserir_resistencia(&(*Arvore)->esquerda,valor_resistencia,quantidade_resistores,soma);
 
-void insere_numero (int v,Estruturadocabecalho* Cabecalho,int r,int s,int w,int q)
-{
-    Lista* ListaN = (Lista*) malloc(sizeof(Lista)); //criacao da lista
-    Resistores* ResistoresN = (Resistores*) malloc(sizeof(Resistores));  //criacao do banco de bados
+        if(valor_resistencia > (*Arvore)->valor_resistencia)
+            inserir_resistencia(&(*Arvore)->direita, valor_resistencia,quantidade_resistores,soma);
 
-    ListaN->ponteirodedados = ResistoresN;   //ListaN agora esta ligada à ResistoresN
-
-    ListaN->ponteirodedados->resistencia=r;
-    ListaN->ponteirodedados->serie=s;
-    ListaN->ponteirodedados->potencia=w;
-    ListaN->ponteirodedados->quantidade= q;
-
-    v--;
-    if (Cabecalho->iniciodecabecalho == NULL)
-    {
-        Cabecalho->iniciodecabecalho = ListaN;
-        Cabecalho->fimdecabecalho  = ListaN;
-        ListaN->listaanterior = NULL;
-        ListaN->listaprox = NULL;
-    }
-    else
-    {
-        Lista* ListaAux;
-        Lista* ListaAux2;
-        ListaAux=Cabecalho->iniciodecabecalho;
-
-        if (v==0)
+        if(valor_resistencia == (*Arvore)->valor_resistencia)
         {
-            ListaN->listaanterior =NULL;
-            ListaN->listaprox = Cabecalho->iniciodecabecalho;
-            Cabecalho->iniciodecabecalho=ListaN;
-        }
-        else if (v==Cabecalho->nelementos)
-        {
-            ListaN->listaanterior = Cabecalho->fimdecabecalho;
-            Cabecalho->fimdecabecalho->listaprox=ListaN;
-            Cabecalho->fimdecabecalho = ListaN;
-            ListaN->listaprox = NULL;
-        }
-        else if (v>Cabecalho->nelementos || v<0)
-            printf("Numero invalido \n");
-        else
-        {
-            int i;
-            for (i=1; i<v; i++)
-                ListaAux=ListaAux->listaprox;
-
-            ListaAux2=ListaAux->listaprox;
-            ListaAux->listaprox=ListaN;
-            ListaN->listaanterior=ListaAux;
-            ListaAux2->listaanterior=ListaN;
-            ListaN->listaprox=ListaAux2;
-        }
-    }
-    Cabecalho->nelementos++; // o numero de elemenos cresceu
-}
-
-void imprime_numero (int v, Estruturadocabecalho* Cabecalho)
-{
-    Lista* ListaAux;
-    ListaAux=Cabecalho->iniciodecabecalho;
-    if (v>Cabecalho->nelementos || v<=0)
-        printf("Numero invalido \n");
-    else if (v==Cabecalho->nelementos)
-        printf("info = %d\n",Cabecalho->fimdecabecalho->ponteirodedados->quantidade);
-    else
-    {
-        int i;
-        for (i=1; i<v; i++)
-            ListaAux=ListaAux->listaprox;
-        printf("Resis.= %8.1f  Serie.= E%.2d Toler. = %5.2f Poten.= %5.2f  Quant.= %.4d  \n", ListaAux->ponteirodedados->resistencia, ListaAux->ponteirodedados->serie, ListaAux->ponteirodedados->tolerancia, ListaAux->ponteirodedados->potencia, ListaAux->ponteirodedados->quantidade);
-    }
-}
-void ordernar (Estruturadocabecalho* Cabecalho)
-{
-    struct resistores* pdados_aux;
-    int i,j,k;
-    int z=0;
-    Lista* ListaAux;
-    for (z=0 ; z <= 2 ; z++)
-    {
-        for(i=Cabecalho->nelementos; i > 1; i--)
-            for(j=0; j < i ; j++)
+            if(soma==0)
             {
-                ListaAux=Cabecalho->iniciodecabecalho;
-                for (k=1; k<j; k++)
-                    ListaAux=ListaAux->listaprox;
-
-                if((ListaAux->ponteirodedados->resistencia>ListaAux->listaprox->ponteirodedados->resistencia && ListaAux->ponteirodedados->serie==ListaAux->listaprox->ponteirodedados->serie && ListaAux->ponteirodedados->potencia==ListaAux->listaprox->ponteirodedados->potencia) || z==0 || z==1)
-                    if((ListaAux->ponteirodedados->potencia>ListaAux->listaprox->ponteirodedados->potencia && ListaAux->ponteirodedados->serie==ListaAux->listaprox->ponteirodedados->serie) || z==0 || z==2)
-                        if(ListaAux->ponteirodedados->serie>ListaAux->listaprox->ponteirodedados->serie || z==1 || z==2)
-                        {
-                            pdados_aux = ListaAux->ponteirodedados;
-                            ListaAux->ponteirodedados = ListaAux->listaprox->ponteirodedados;
-                            ListaAux->listaprox->ponteirodedados = pdados_aux;
-                        }
-            }
-    }
-}
-
-void adiciona_resistor(Estruturadocabecalho* Cabecalho)
-{
-    Lista* ListaAux;
-    ListaAux=Cabecalho->iniciodecabecalho;
-    int i=0,serie=0,quantidade=0;
-    float resitencia=0,potencia=0,tolerancia=0,zeropontoum=0.1;
-    char resposta;
-
-    printf("\n Entre com os valores de: \n\n Resistência:");
-    scanf("%f",&resitencia);
-    printf(" Série:");
-    scanf("%d",&serie);
-    printf(" Tolerância:");
-    scanf("%f",&tolerancia);
-    printf(" Potência:");
-    scanf("%f",&potencia);
-    printf(" Quantidade:");
-    scanf("%d",&quantidade);
-    fflush(stdin);
-    printf("\n Os Valores estão corretos? (S/N) \n Resis.= %8.1f  Serie.= E%.2d Toler. = %5.2f Poten.= %5.2f  Quant.= %.4d  \n",resitencia,serie,tolerancia,potencia,quantidade);
-    scanf("%c",&resposta);
-    if (resposta=='S' || resposta=='s')
-    {
-        if (serie==0 || serie==6 || serie==12 || serie==24 || serie==48 || serie==96 || serie==192)
-        {
-            if(serie==0 && tolerancia==0)
-            {
-                printf(" Informe pelo menos um dos itens abaixo:\n Série \n Tolerância \n");
-                ListaAux=NULL;
-                i++;
-            }
-
-            if(serie==192 && (!( tolerancia== 0.50 || tolerancia== 0.25 || tolerancia==zeropontoum )))
-            {
-                printf(" Para resistores da série E192 é obrigatório informar a tolerância \n");
-                while(1)
-                {
-                    fflush(stdin);
-                    printf(" Tolerância:");
-                    scanf("%f",&tolerancia);
-
-                    if (tolerancia==0.5 || tolerancia==0.25 || tolerancia==zeropontoum)
-                        break;
-                    else
-                        printf(" A tolerância informada é inválida, tente novamente\n");
-                }
-            }
-
-            if (serie==24)
-                tolerancia=5;
-            else if (serie==12)
-                tolerancia=10;
-            else if (serie==48)
-                tolerancia=2;
-            else if (serie==6)
-                tolerancia=20;
-            else if (serie==96)
-                tolerancia=1;
-
-            if (tolerancia==20)
-                serie=6;
-            else if (tolerancia==10)
-                serie=12;
-            else if (tolerancia==5)
-                serie=24;
-            else if (tolerancia==2)
-                serie=48;
-            else if (tolerancia==1)
-                serie=96;
-
-
-            while(ListaAux!=NULL)
-            {
-                if (ListaAux->ponteirodedados->resistencia == resitencia && ListaAux->ponteirodedados->serie == serie && ListaAux->ponteirodedados->tolerancia == tolerancia && ListaAux->ponteirodedados->potencia == potencia)
-                {
-                    fflush(stdin);
-                    printf(" Este Resistor já está na lista, deseja adicionar a quantidade digitada? (S/N)\n");
-                    scanf("%c",&resposta);
-                    if (resposta=='S' || resposta=='s')
-                    {
-                        ListaAux->ponteirodedados->quantidade=ListaAux->ponteirodedados->quantidade+quantidade;
-                        printf(" A adição do resistor foi bem sucedida\n");
-                    }
-                    else
-                        printf(" A adição do resistor foi cancelada\n");
-                    i++;
-                }
-                ListaAux=ListaAux->listaprox;
-            }
-            if(i==0)
-            {
-                Lista* ListaN = (Lista*) malloc(sizeof(Lista)); //lista dupla
-                Resistores* ResistoresN = (Resistores*) malloc(sizeof(Resistores));  //banco de bados
-
-                ListaN->ponteirodedados = ResistoresN;
-
-                ListaN->ponteirodedados->resistencia=resitencia;
-                ListaN->ponteirodedados->serie=serie;
-                ListaN->ponteirodedados->tolerancia=tolerancia;
-                ListaN->ponteirodedados->potencia=potencia;
-                ListaN->ponteirodedados->quantidade= quantidade;
-
-                if (Cabecalho->iniciodecabecalho == NULL)
-                {
-                    Cabecalho->iniciodecabecalho = ListaN;
-                    ListaN->listaanterior = NULL;
-                }
+                if((*Arvore)->quantidade_resistores<quantidade_resistores)
+                    printf("\n *A quantidate a ser retirada é maior do que a quantidate em estoque* \n");
                 else
-                {
-                    Cabecalho->fimdecabecalho->listaprox=ListaN;
-                    ListaN->listaanterior = Cabecalho->fimdecabecalho;
-                }
-                Cabecalho->fimdecabecalho = ListaN;
-                ListaN->listaprox = NULL;
-                Cabecalho->nelementos++;
-                printf(" A adição do resistor foi bem sucedida\n");
+                    (*Arvore)->quantidade_resistores-=quantidade_resistores;
+                printf("\n *Resistor retirado com sucesso* \n");
             }
-        }
-        else
-            printf(" Esta série não existe\n Este resistor não pode ser adicionado\n");
-    }
-    else
-        printf(" A adição do resistor foi cancelada\n");
-}
-
-void busca_resistor(Estruturadocabecalho* Cabecalho)
-{
-    Lista* ListaAux;
-    ListaAux=Cabecalho->iniciodecabecalho;
-    int i=0,serie=0,quantidade=0;
-    float resitencia=0,potencia=0;
-    char sa[10];
-    char sb[10];
-    char sc[10];
-    char sd[10];
-
-    fflush(stdin);
-    printf("\n Entre com os valores conhecidos de: \n\n Resistência:");
-    fgets(sa, sizeof(sa), stdin);
-    resitencia = atof(sa);
-    printf(" Série:");
-    fgets(sb, sizeof(sb), stdin);
-    serie = atoi(sb);
-    printf(" Potência:");
-    fgets(sc, sizeof(sc), stdin);
-    potencia = atof(sc);
-    printf(" Quantidade:");
-    fgets(sd, sizeof(sd), stdin);
-    quantidade = atoi(sd);
-
-    while(ListaAux!=NULL)
-    {
-        if ((ListaAux->ponteirodedados->resistencia == resitencia || resitencia==0) && (ListaAux->ponteirodedados->serie == serie || serie==0) && (ListaAux->ponteirodedados->potencia == potencia || potencia==0) && (ListaAux->ponteirodedados->quantidade == quantidade || quantidade==0))
-        {
-            printf("Resis.= %8.1f  Serie.= E%.2d  Poten.= %5.2f  Quant.= %.4d  \n", ListaAux->ponteirodedados->resistencia, ListaAux->ponteirodedados->serie, ListaAux->ponteirodedados->potencia, ListaAux->ponteirodedados->quantidade);
-            i++;
-        }
-        ListaAux=ListaAux->listaprox;
-    }
-    if(i==0)
-        printf("\n *Nenhum resultado foi encontrado*\n");
-}
-
-void apaga_resistor(Estruturadocabecalho* Cabecalho)
-{
-    Lista* ListaAux;
-    ListaAux=Cabecalho->iniciodecabecalho;
-    int i=0,serie=0;
-    float resitencia=0,potencia=0;
-    char sa[10];
-    char sb[10];
-    char sc[10];
-
-    fflush(stdin);
-    printf("\n Entre com os valores conhecidos de: \n\n Resistência:");
-    fgets(sa, sizeof(sa), stdin);
-    resitencia = atof(sa);
-    printf(" Série:");
-    fgets(sb, sizeof(sb), stdin);
-    serie = atoi(sb);
-    printf(" Potência:");
-    fgets(sc, sizeof(sc), stdin);
-    potencia = atof(sc);
-    while(ListaAux!=NULL)
-    {
-        if (ListaAux->ponteirodedados->resistencia == resitencia && ListaAux->ponteirodedados->serie == serie && ListaAux->ponteirodedados->potencia == potencia)
-        {
-            if (ListaAux->listaanterior==NULL)
+            else if(soma==1)
             {
-                Cabecalho->iniciodecabecalho=ListaAux->listaprox;
-                Cabecalho->iniciodecabecalho->listaanterior=NULL;
+                if((*Arvore)->quantidade_resistores==-1)
+                    (*Arvore)->quantidade_resistores=0;
+                (*Arvore)->quantidade_resistores+=quantidade_resistores;
+                printf("\n *Resistor adicionado com sucesso* \n");
             }
-            else
-                ListaAux->listaanterior->listaprox=ListaAux->listaprox;
-
-            if (ListaAux->listaprox==NULL)
-                Cabecalho->fimdecabecalho=ListaAux->listaanterior;
-            else
-                ListaAux->listaprox->listaanterior=ListaAux->listaanterior;
-            Cabecalho->nelementos--;
-            free(ListaAux);
-            i++;
-        }
-        ListaAux=ListaAux->listaprox;
-    }
-    if(i==0)
-        printf("\n *Nenhum item foi encontrado/deletado*\n");
-    else
-        printf("\n *O resistor foi apagado com sucesso*\n");
-}
-
-void retira_resistor(Estruturadocabecalho* Cabecalho)
-{
-    Lista* ListaAux;
-    ListaAux=Cabecalho->iniciodecabecalho;
-    int i=0,serie=0,quantidade=0;
-    float resitencia=0,potencia=0;
-    char resposta;
-
-    printf("\n Entre com os valores de: \n\n Resistência:");
-    scanf("%f",&resitencia);
-    printf(" Série:");
-    scanf("%d",&serie);
-    printf(" Potência:");
-    scanf("%f",&potencia);
-    printf("\n Qual será a quantidade retirada?\n ");
-    scanf("%d",&quantidade);
-    fflush(stdin);
-    printf("\n Os Valores estão corretos? (S/N)");
-    scanf("%c",&resposta);
-    if (resposta=='S' || resposta=='s')
-    {
-        while(ListaAux!=NULL)
-        {
-            if (ListaAux->ponteirodedados->resistencia == resitencia && ListaAux->ponteirodedados->serie == serie && ListaAux->ponteirodedados->potencia == potencia)
+            else if(soma==2)
             {
-                ListaAux->ponteirodedados->quantidade=ListaAux->ponteirodedados->quantidade-quantidade;
-                i++;
-                printf("\n *A quantidade de resistores foi retirada com sucesso*\n");
+                (*Arvore)->quantidade_resistores=-1;
+                printf("\n *Resistor removido com sucesso* \n");
             }
-            ListaAux=ListaAux->listaprox;
         }
-        if(i==0)
-            printf("\n *Nenhum item foi encontrado/retirado*\n");
+    }
+}
+void inserir_potencia(Potencia**Arvore, float potencia_resistor, float valor_resistencia,int quantidade_resistores,int soma)
+{
+    if(*Arvore == NULL)
+    {
+        Potencia* PotenciaN = (Potencia*) malloc(sizeof(Potencia));
+        PotenciaN->esquerda = NULL;
+        PotenciaN->direita = NULL;
+        PotenciaN->resistencia =NULL;
+        PotenciaN->potencia_resistor = potencia_resistor;
+        *Arvore=PotenciaN;
+        inserir_resistencia(&PotenciaN->resistencia,valor_resistencia,quantidade_resistores,soma);
     }
     else
-        printf("\n *A retirada de resistores foi cancelada*\n");
-}
+    {
+        if(potencia_resistor < (*Arvore)->potencia_resistor)
+            inserir_potencia(&(*Arvore)->esquerda,potencia_resistor,valor_resistencia,quantidade_resistores,soma);
 
-const char NOME_ARQ[] = "resistores.txt";
+        if(potencia_resistor > (*Arvore)->potencia_resistor)
+            inserir_potencia(&(*Arvore)->direita,potencia_resistor,valor_resistencia,quantidade_resistores,soma);
+
+        if(potencia_resistor == (*Arvore)->potencia_resistor)
+            inserir_resistencia(&(*Arvore)->resistencia,valor_resistencia,quantidade_resistores,soma);
+    }
+}
+void inserir(Serie**Arvore, int numero_serie,float potencia_resistor,float valor_resistencia,int quantidade_resistores,int soma)
+{
+    if(*Arvore == NULL)
+    {
+        Serie* SerieN = (Serie*) malloc(sizeof(Serie));
+        SerieN->esquerda = NULL;
+        SerieN->direita = NULL;
+        SerieN->numero_serie = numero_serie;
+        //SerieN->valor_tolerancia=valor_tolerancia;
+        SerieN->potencia = NULL;
+        *Arvore=SerieN;
+        inserir_potencia(&(*Arvore)->potencia,potencia_resistor,valor_resistencia,quantidade_resistores,soma);
+    }
+    else
+    {
+        if(numero_serie < (*Arvore)->numero_serie)
+            inserir(&(*Arvore)->esquerda,numero_serie,potencia_resistor,valor_resistencia,quantidade_resistores,soma);
+
+        if(numero_serie > (*Arvore)->numero_serie)
+            inserir(&(*Arvore)->direita, numero_serie,potencia_resistor,valor_resistencia,quantidade_resistores,soma);
+
+        if(numero_serie == (*Arvore)->numero_serie)
+            inserir_potencia(&(*Arvore)->potencia,potencia_resistor,valor_resistencia,quantidade_resistores,soma);
+    }
+}
+/// //////////////////////////////////////////////////////////FIM INSERSÃO ADIÇÃO REMOÇÁO RESISTORES////////////////////////////////////
+
+/// /////////////////////////////////////INICIO EXPORTA TXT ///////////////////////////////////////////
+void Exporta_Arquivo_3(Resistencia*Arvore,int numero_serie,float potencia_resistor,FILE * fp)
+{
+    if(Arvore != NULL)
+    {
+        Exporta_Arquivo_3(Arvore->esquerda,numero_serie,potencia_resistor,fp);
+        //printf(" Série: E%d\tPotência:%5.2f\tResistencia:%9.1f\tQuantidade:%6d\n",numero_serie, potencia_resistor,Arvore->valor_resistencia,Arvore->quantidade_resistores);
+        if(Arvore->quantidade_resistores>0)
+            fprintf(fp,"%d\t %5.2f %12.1f %6d\n",numero_serie, potencia_resistor, Arvore->valor_resistencia, Arvore->quantidade_resistores);
+        Exporta_Arquivo_3(Arvore->direita,numero_serie,potencia_resistor,fp);
+    }
+}
+void Exporta_Arquivo_2(Potencia*Arvore, int numero_serie,FILE * fp)
+{
+    if(Arvore != NULL)
+    {
+        Exporta_Arquivo_2(Arvore->esquerda,numero_serie,fp);
+        Exporta_Arquivo_3(Arvore->resistencia,numero_serie,Arvore->potencia_resistor,fp);
+        Exporta_Arquivo_2(Arvore->direita,numero_serie,fp);
+    }
+}
+void Exporta_Arquivo(Serie*Arvore,FILE * fp)
+{
+    if(Arvore != NULL)
+    {
+        Exporta_Arquivo(Arvore->esquerda,fp);
+        Exporta_Arquivo_2(Arvore->potencia,Arvore->numero_serie,fp);
+        Exporta_Arquivo(Arvore->direita,fp);
+    }
+}
+/// ///////////////////////////////////////FIM EXPORTA TXT ///////////////////////////////////////////
+
+/// ///////////////////////////////////////////////////INICIO BUSCA RESISTORES////////////////////////////////////////////////////
+void Busca_resitencia(Resistencia*Arvore,int numero_serie,float potencia_resistor,float valor_resistencia,int quantidade_resistores)
+{
+    if(Arvore != NULL)
+    {
+        Busca_resitencia(Arvore->esquerda,numero_serie,potencia_resistor,valor_resistencia,quantidade_resistores);
+        if(((valor_resistencia == Arvore->valor_resistencia && quantidade_resistores ==0) || (quantidade_resistores==Arvore->quantidade_resistores && valor_resistencia ==0) || (valor_resistencia==0 &&quantidade_resistores ==0) || (valor_resistencia==Arvore->valor_resistencia && quantidade_resistores==Arvore->quantidade_resistores)) && (Arvore->quantidade_resistores>=0))
+        {
+            ///printf("Série: E%d\tPotência:%5.2f\tResistencia:%9.1f\tQuantidade:%6d\n",numero_serie, potencia_resistor,Arvore->valor_resistencia,Arvore->quantidade_resistores);
+            al_draw_textf(font1, al_map_rgb(0,0,0),60,j,ALLEGRO_ALIGN_LEFT,"Serie: E%d",numero_serie);
+            al_draw_textf(font1, al_map_rgb(0,0,0),200,j,ALLEGRO_ALIGN_LEFT,"Potencia: %.2f",potencia_resistor);
+            al_draw_textf(font1, al_map_rgb(0,0,0),380,j,ALLEGRO_ALIGN_LEFT,"Resistencia: %.1f",Arvore->valor_resistencia);
+            al_draw_textf(font1, al_map_rgb(0,0,0),600,j,ALLEGRO_ALIGN_LEFT,"Quantidade:%6d",Arvore->quantidade_resistores);
+            j=j+20;
+        }
+
+        Busca_resitencia(Arvore->direita,numero_serie,potencia_resistor,valor_resistencia,quantidade_resistores);
+    }
+}
+void Busca_potencia(Potencia*Arvore,int numero_serie,float potencia_resistor,float valor_resistencia,int quantidade_resistores)
+{
+    if(Arvore != NULL)
+    {
+        Busca_potencia(Arvore->esquerda,numero_serie,potencia_resistor,valor_resistencia,quantidade_resistores);
+        if(potencia_resistor == Arvore->potencia_resistor || potencia_resistor ==0)
+            Busca_resitencia(Arvore->resistencia,numero_serie, Arvore->potencia_resistor,valor_resistencia,quantidade_resistores);
+        Busca_potencia(Arvore->direita,numero_serie,potencia_resistor,valor_resistencia,quantidade_resistores);
+    }
+}
+void Busca_serie(Serie*Arvore, int numero_serie,float potencia_resistor,float valor_resistencia,int quantidade_resistores)
+{
+    if(Arvore != NULL)
+    {
+        Busca_serie(Arvore->esquerda,numero_serie,potencia_resistor,valor_resistencia,quantidade_resistores);
+        if(numero_serie == Arvore->numero_serie || numero_serie ==0)
+        {
+            //printf("Série:E%d\n", Arvore->numero_serie);
+            Busca_potencia(Arvore->potencia,Arvore->numero_serie,potencia_resistor,valor_resistencia,quantidade_resistores);
+        }
+        Busca_serie(Arvore->direita,numero_serie,potencia_resistor,valor_resistencia,quantidade_resistores);
+    }
+}
+/// ///////////////////////////////////////////////////INICIO BUSCA RESISTORES////////////////////////////////////////////////////
 
 bool inicializar()
 {
@@ -452,6 +272,7 @@ bool inicializar()
     al_set_window_title(display, "Base de dados de Resistores");
     al_init_image_addon();
     al_init_font_addon();
+    al_init_primitives_addon();
     al_init_ttf_addon();
     al_install_mouse();
     al_install_keyboard();
@@ -469,7 +290,7 @@ bool inicializar()
     return true;
 }
 
-void manipular_entrada(ALLEGRO_EVENT ev)
+char* manipular_entrada(ALLEGRO_EVENT ev)
 {
     if (strlen(str) <= 16)
     {
@@ -478,102 +299,354 @@ void manipular_entrada(ALLEGRO_EVENT ev)
         {
             strcat(str, temp);
         }
-        else if (ev.keyboard.unichar >= '0' &&
-                 ev.keyboard.unichar <= '9')
+        else if (ev.keyboard.unichar >= '0' && ev.keyboard.unichar <= '9')
         {
             strcat(str, temp);
         }
-        else if (ev.keyboard.unichar >= 'A' &&
-                 ev.keyboard.unichar <= 'Z')
+        else if (ev.keyboard.unichar >= 'A' && ev.keyboard.unichar <= 'Z')
         {
             strcat(str, temp);
         }
-        else if (ev.keyboard.unichar >= 'a' &&
-                 ev.keyboard.unichar <= 'z')
+        else if (ev.keyboard.unichar >= 'a' && ev.keyboard.unichar <= 'z')
+        {
+            strcat(str, temp);
+        }
+        else if (ev.keyboard.unichar =='.')
         {
             strcat(str, temp);
         }
     }
 
+    if (ev.keyboard.keycode == ALLEGRO_KEY_ENTER)
+    {
+        return (atoi(str));
+    }
     if (ev.keyboard.keycode == ALLEGRO_KEY_BACKSPACE && strlen(str) != 0)
     {
         str[strlen(str) - 1] = '\0';
     }
+}
 
-    if (strlen(str) > 0)
+void opera_resistor(Serie*Arvore,ALLEGRO_EVENT ev, int soma)
+{
+    int serie=0,quantidade=0,i=0;
+    float resitencia=0,potencia=0,tolerancia=0,zeropontoum=0.1;
+    char resposta;
+
+    al_draw_filled_rectangle(450,150,450+200,150+40,al_map_rgb(205,205,205));
+    al_draw_filled_rectangle(450,150+90,450+200,150+90+40,al_map_rgb(205,205,205));
+    al_draw_filled_rectangle(450,150+180,450+200,150+180+40,al_map_rgb(205,205,205));
+    if(soma!=2)
+        al_draw_filled_rectangle(450,150+270,450+200,150+270+40,al_map_rgb(205,205,205));
+
+    al_draw_textf(font3, al_map_rgb(0, 0, 0), 100, 100, ALLEGRO_ALIGN_LEFT, "Entre com os valores de:");
+    al_draw_textf(font3, al_map_rgb(0, 0, 0), 440, 160, ALLEGRO_ALIGN_RIGHT, "Serie:");
+    al_draw_textf(font3, al_map_rgb(0, 0, 0), 440, 250, ALLEGRO_ALIGN_RIGHT, "Potencia:");
+    al_draw_textf(font3, al_map_rgb(0, 0, 0), 440, 340, ALLEGRO_ALIGN_RIGHT, "Resistencia:");
+    if(soma!=2)
+        al_draw_textf(font3, al_map_rgb(0, 0, 0), 440, 430, ALLEGRO_ALIGN_RIGHT, "Quantidade:");
+
+    while(1)
     {
-        al_draw_textf(font1, al_map_rgb(0, 0, 0), 430, 350, ALLEGRO_ALIGN_CENTRE, "%c",str);
+        while(1)
+        {
+            if(ev.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
+                break;
+
+            al_wait_for_event(event_queue, &ev);
+            if (ev.type == ALLEGRO_EVENT_KEY_CHAR)
+                if((ev.keyboard.keycode == ALLEGRO_KEY_DOWN)||(ev.keyboard.keycode == ALLEGRO_KEY_ENTER) || (ev.keyboard.keycode == ALLEGRO_KEY_PAD_ENTER))
+                    break;
+
+            al_draw_filled_rectangle(450,150,450+200,150+40,al_map_rgb(255,255,255));
+            manipular_entrada(ev);
+            al_draw_textf(font1, al_map_rgb(0, 0, 0), 460, 160, ALLEGRO_ALIGN_LEFT, "%s",str);
+            al_flip_display();
+        }
+        serie=atoi(str);
+        str[0]='\0';
+        al_draw_filled_rectangle(450,150,450+200,150+40,al_map_rgb(205,205,205));
+        al_draw_textf(font1, al_map_rgb(0, 0, 0), 460, 160, ALLEGRO_ALIGN_LEFT, "%d",serie);
+        //al_flip_display();
+        if ((serie==6 || serie==12 || serie==24 || serie==48 || serie==96 || serie==192) ||(ev.keyboard.keycode == ALLEGRO_KEY_ESCAPE))
+            break;
+        else
+            al_show_native_message_box(display,"Erro"," ", "Serie incorreta!", NULL, 0);
     }
+
+    while(1)
+    {
+        if(ev.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
+            break;
+
+        al_wait_for_event(event_queue, &ev);
+        if (ev.type == ALLEGRO_EVENT_KEY_CHAR)
+            if((ev.keyboard.keycode == ALLEGRO_KEY_DOWN)||(ev.keyboard.keycode == ALLEGRO_KEY_ENTER) || (ev.keyboard.keycode == ALLEGRO_KEY_PAD_ENTER))
+                break;
+
+        al_draw_filled_rectangle(450,150+90,450+200,150+90+40,al_map_rgb(255,255,255));
+        manipular_entrada(ev);
+        al_draw_textf(font1, al_map_rgb(0, 0, 0), 460, 160+90, ALLEGRO_ALIGN_LEFT, "%s",str);
+        al_flip_display();
+    }
+    potencia=atof(str);
+    str[0]='\0';
+    al_draw_filled_rectangle(450,150+90,450+200,150+90+40,al_map_rgb(205,205,205));
+    al_draw_textf(font1, al_map_rgb(0, 0, 0), 460, 160+90, ALLEGRO_ALIGN_LEFT, "%f",potencia);
+    al_flip_display();
+
+    while(1)
+    {
+        if(ev.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
+            break;
+
+        al_wait_for_event(event_queue, &ev);
+        if (ev.type == ALLEGRO_EVENT_KEY_CHAR)
+            if((ev.keyboard.keycode == ALLEGRO_KEY_DOWN)||(ev.keyboard.keycode == ALLEGRO_KEY_ENTER) || (ev.keyboard.keycode == ALLEGRO_KEY_PAD_ENTER))
+                break;
+
+        al_draw_filled_rectangle(450,150+180,450+200,150+180+40,al_map_rgb(255,255,255));
+        manipular_entrada(ev);
+        al_draw_textf(font1, al_map_rgb(0, 0, 0), 460, 160+180, ALLEGRO_ALIGN_LEFT, "%s",str);
+        al_flip_display();
+    }
+    resitencia=atof(str);
+    str[0]='\0';
+    al_draw_filled_rectangle(450,150+180,450+200,150+180+40,al_map_rgb(205,205,205));
+    al_draw_textf(font1, al_map_rgb(0, 0, 0), 460, 160+180, ALLEGRO_ALIGN_LEFT, "%f",resitencia);
+    al_flip_display();
+
+    if(soma!=2)
+    {
+        while(1)
+        {
+            while(1)
+            {
+                if(ev.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
+                    break;
+
+                al_wait_for_event(event_queue, &ev);
+                if (ev.type == ALLEGRO_EVENT_KEY_CHAR)
+                    if((ev.keyboard.keycode == ALLEGRO_KEY_DOWN)||(ev.keyboard.keycode == ALLEGRO_KEY_ENTER) || (ev.keyboard.keycode == ALLEGRO_KEY_PAD_ENTER))
+                        break;
+                al_draw_filled_rectangle(450,150+270,450+200,150+270+40,al_map_rgb(255,255,255));
+                manipular_entrada(ev);
+                al_draw_textf(font1, al_map_rgb(0, 0, 0), 460, 160+270, ALLEGRO_ALIGN_LEFT, "%s",str);
+                al_flip_display();
+            }
+            quantidade=atoi(str);
+            str[0]='\0';
+            al_draw_filled_rectangle(450,150+270,450+200,150+270+40,al_map_rgb(205,205,205));
+            al_draw_textf(font1, al_map_rgb(0, 0, 0), 460, 160+270, ALLEGRO_ALIGN_LEFT, "%d",quantidade);
+
+            if ((quantidade>0) ||(ev.keyboard.keycode == ALLEGRO_KEY_ESCAPE) || (soma==3))
+                break;
+            else
+                al_show_native_message_box(display,"Erro"," ", "Preencha a quantidade!", NULL, 0);
+        }
+    }
+
+    al_draw_textf(font1, al_map_rgb(0, 0, 0), 400, 500, ALLEGRO_ALIGN_CENTRE, "Os valores estao corretos (S/N)?");
+    al_flip_display();
+
+    while(1)
+    {
+        if(ev.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
+            break;
+
+        al_wait_for_event(event_queue, &ev);
+        if (ev.type == ALLEGRO_EVENT_KEY_CHAR)
+            if((ev.keyboard.keycode == ALLEGRO_KEY_N))
+            {
+                al_show_native_message_box(display," "," ", "Operacao Cancelada!", NULL, 0);
+                break;
+            }
+        if((ev.keyboard.keycode == ALLEGRO_KEY_S))
+        {
+            ///al_show_native_message_box(display," "," ", "Operacao Concluida!", NULL, 0);
+            if(soma==0 ||soma==1)
+            {
+                inserir(&Arvore,serie,potencia,resitencia,quantidade,soma);
+                break;
+            }
+            if(soma==2)
+            {
+                inserir(&Arvore,serie,potencia,resitencia,0,soma);
+                break;
+            }
+
+            if(soma==3)
+            {
+                j=100;
+                al_clear_to_color(al_map_rgb(168,168,168));
+                Busca_serie(Arvore,serie,potencia,resitencia,quantidade);
+                al_draw_textf(font1, al_map_rgb(0, 0, 0), 400, 550, ALLEGRO_ALIGN_CENTRE, "%s", texto8);
+                al_draw_textf(font2, al_map_rgb(0, 0, 0), 400, 50, ALLEGRO_ALIGN_CENTRE, "Busca concluida!");
+                al_flip_display();
+            }
+            //break;
+        }
+    }
+    al_flip_display();
+}
+
+void apaga_resistor(Serie*Arvore)
+{
+    int/* i=0,*/serie=0,quantidade=0;
+    float resitencia=0,potencia=0;
+    char resposta;
+
+    printf("\n Entre com os valores de: \n\n Resistência:");
+    scanf("%f",&resitencia);
+    printf(" Série:");
+    scanf("%d",&serie);
+    printf(" Potência:");
+    scanf("%f",&potencia);
+    fflush(stdin);
+    printf("\n Os Valores estão corretos? (S/N)");
+    scanf("%c",&resposta);
+
+    if (resposta=='S' || resposta=='s')
+        inserir(&Arvore,serie,potencia,resitencia,quantidade,2);
+    else
+        printf("\n *A operação foi cancelada*\n");
+}
+
+void retira_resistor(Serie*Arvore)
+{
+    int/* i=0,*/serie=0,quantidade=0;
+    float resitencia=0,potencia=0;
+    char resposta;
+
+    printf("\n Entre com os valores de: \n\n Resistência:");
+    scanf("%f",&resitencia);
+    printf(" Série:");
+    scanf("%d",&serie);
+    printf(" Potência:");
+    scanf("%f",&potencia);
+    printf("\n Qual será a quantidade retirada?\n ");
+    scanf("%d",&quantidade);
+    fflush(stdin);
+    printf("\n Os Valores estão corretos? (S/N)");
+    scanf("%c",&resposta);
+
+    if (resposta=='S' || resposta=='s')
+        inserir(&Arvore,serie,potencia,resitencia,quantidade,0);
+    else
+        printf("\n *A retirada de resistores foi cancelada*\n");
+}
+
+void busca_resistor(Serie*Arvore)
+{
+    int/* i=0,*/serie=0,quantidade=0;
+    float resitencia=0,potencia=0;
+    char sa[10];
+    char sb[10];
+    char sc[10];
+    char sd[10];
+
+
+    al_draw_textf(font3, al_map_rgb(0, 0, 0), 100, 100, ALLEGRO_ALIGN_LEFT, "Entre com os valores de:");
+    al_draw_textf(font3, al_map_rgb(0, 0, 0), 440, 160, ALLEGRO_ALIGN_RIGHT, "Serie:");
+    al_draw_textf(font3, al_map_rgb(0, 0, 0), 440, 250, ALLEGRO_ALIGN_RIGHT, "Potencia:");
+    al_draw_textf(font3, al_map_rgb(0, 0, 0), 440, 340, ALLEGRO_ALIGN_RIGHT, "Resistencia:");
+    al_draw_textf(font3, al_map_rgb(0, 0, 0), 440, 430, ALLEGRO_ALIGN_RIGHT, "Quantidade:");
+    /*fflush(stdin);
+    printf("\n Entre com os valores conhecidos de: \n\n Resistência:");
+    fgets(sa, sizeof(sa), stdin);
+    resitencia = atof(sa);
+    printf(" Série:");
+    fgets(sb, sizeof(sb), stdin);
+    serie = atoi(sb);
+    printf(" Potência:");
+    fgets(sc, sizeof(sc), stdin);
+    potencia = atof(sc);
+    printf(" Quantidade:");
+    fgets(sd, sizeof(sd), stdin);
+    quantidade = atoi(sd);*/
+
+    Busca_serie(Arvore,serie,potencia,resitencia,quantidade);
+
+}
+const char NOME_ARQ[] = "resistores.txt";
+const char NOME_ARQ2[] = "resistores_arvore.txt";
+
+
+void Imprime_menu(void)
+{
+    al_clear_to_color(al_map_rgb(168,168,168));
+    al_draw_bitmap(img, 1, 1, 1);
+    al_draw_bitmap(imagem3, 1,430, 0);
+    al_draw_textf(font3, al_map_rgb(0, 0, 0), 140, 530, ALLEGRO_ALIGN_LEFT, "%s", texto9);
+    al_draw_textf(font3, al_map_rgb(0, 0, 0), 140, 557, ALLEGRO_ALIGN_LEFT, "%s", texto10);
+    al_draw_textf(font2, al_map_rgb(0, 0, 0), 510, 30, ALLEGRO_ALIGN_CENTRE, "%s", texto);
+    al_draw_bitmap(imagem1,390,90,0);
+    al_draw_textf(font1, al_map_rgb(0, 0, 0), 510, 100, ALLEGRO_ALIGN_CENTRE, "%s", texto1);
+    al_draw_bitmap(imagem1,390,130,0);
+    al_draw_textf(font1, al_map_rgb(0, 0, 0), 510, 140, ALLEGRO_ALIGN_CENTRE, "%s", texto2);
+    al_draw_bitmap(imagem1,390,170,0);
+    al_draw_textf(font1, al_map_rgb(0, 0, 0), 510, 180, ALLEGRO_ALIGN_CENTRE, "%s", texto3);
+    al_draw_bitmap(imagem1,390,210,0);
+    al_draw_textf(font1, al_map_rgb(0, 0, 0), 510, 220, ALLEGRO_ALIGN_CENTRE, "%s", texto4);
+    al_draw_bitmap(imagem1,390,250,0);
+    al_draw_textf(font1, al_map_rgb(0, 0, 0), 510, 260, ALLEGRO_ALIGN_CENTRE, "%s", texto5);
+    al_draw_bitmap(imagem1,390,290,0);
+    al_draw_textf(font1, al_map_rgb(0, 0, 0), 510, 300, ALLEGRO_ALIGN_CENTRE, "%s", texto6);
+    al_draw_bitmap(imagem1,390,330,0);
+    al_draw_textf(font1, al_map_rgb(0, 0, 0), 510, 340, ALLEGRO_ALIGN_CENTRE, "%s", texto7);
+    al_flip_display();
+}
+
+void desenha_caixas(void)
+{
+    /* al_draw_filled_rectangle(450,150,450+200,150+40,al_map_rgb(205,205,205));
+     al_draw_filled_rectangle(450,150+90,450+200,150+90+40,al_map_rgb(205,205,205));
+     al_draw_filled_rectangle(450,150+180,450+200,150+180+40,al_map_rgb(205,205,205));
+     al_draw_filled_rectangle(450,150+270,450+200,150+270+40,al_map_rgb(205,205,205));*/
 }
 
 int main()
 {
+    setlocale(LC_ALL,"");
     inicializar();
-    char *texto = "BASE DE DADOS DE RESISTORES";
-    char *texto1 = "1. Consultar Resistores";
-    char *texto2 = "2. Adicionar Resistores";
-    char *texto3 = "3. Buscar Resistores";
-    char *texto4 = "4. Apagar Resistores";
-    char *texto5 = "5. Retirar Resistores";
-    char *texto6 = "6. Salvar e Sair";
-    char *texto7 = "7. Sair";
-    char *texto8 = "Aperte ESC para voltar ao Menu.";
-    char *texto9 = "Instituto Federal";
-    char *texto10 = "Santa Catarina";
 
-    setlocale(LC_CTYPE,"portuguese");
-    int p=3, n;
-
+    int p=3,n;
+    bool cancelar;
     int serie=0,quantidade=0;
-    float resitencia=0,potencia=0,tolerancia=0;
-    Lista* ListaAux;
+    float resitencia=0,potencia=0/*,tolerancia=0*/;
     FILE *fp;
-    fp = fopen(NOME_ARQ,"r");
+    FILE *fs;
+
+    Serie*Arvore;
+    Arvore = NULL;
+
+    fp = fopen(NOME_ARQ2,"r");
     if (fp == NULL)
     {
-        printf("Erro ao abrir arquivo %s.\n", NOME_ARQ);
-        exit(1);
+        printf("Erro ao abrir arquivo %s.\n", NOME_ARQ2);
+        return 0;
     }
-    Estruturadocabecalho* Cabecalho = (Estruturadocabecalho*) malloc(sizeof(Estruturadocabecalho));   //criando cabecalho
-    inic_cabecalho(Cabecalho);
+
     while(1)
     {
-        n=fscanf(fp,"%f %d %f %f %d",&resitencia,&serie,&tolerancia,&potencia,&quantidade);
+        n=fscanf(fp,"%d %f %f %d",&serie,&potencia,&resitencia,&quantidade);
         if (n==EOF)
             break;
-        inserefim(Cabecalho,resitencia,serie,tolerancia,potencia,quantidade);
+        inserir(&Arvore,serie,potencia,resitencia,quantidade,1);
     }
-    ordernar(Cabecalho);
+    fclose(fp);
+    system("cls");
 
     while(!doexit)
     {
         while(!doimprime)
         {
-            al_clear_to_color(al_map_rgb(168,168,168));
-            al_draw_bitmap(img, 1, 1, 1);
-            al_draw_bitmap(imagem3, 1,430, 0);
-            al_draw_textf(font3, al_map_rgb(0, 0, 0), 140, 530, ALLEGRO_ALIGN_LEFT, "%s", texto9);
-            al_draw_textf(font3, al_map_rgb(0, 0, 0), 140, 557, ALLEGRO_ALIGN_LEFT, "%s", texto10);
-            al_draw_textf(font2, al_map_rgb(0, 0, 0), 510, 30, ALLEGRO_ALIGN_CENTRE, "%s", texto);
-            al_draw_bitmap(imagem1,390,90,0);
-            al_draw_textf(font1, al_map_rgb(0, 0, 0), 510, 100, ALLEGRO_ALIGN_CENTRE, "%s", texto1);
-            al_draw_bitmap(imagem1,390,130,0);
-            al_draw_textf(font1, al_map_rgb(0, 0, 0), 510, 140, ALLEGRO_ALIGN_CENTRE, "%s", texto2);
-            al_draw_bitmap(imagem1,390,170,0);
-            al_draw_textf(font1, al_map_rgb(0, 0, 0), 510, 180, ALLEGRO_ALIGN_CENTRE, "%s", texto3);
-            al_draw_bitmap(imagem1,390,210,0);
-            al_draw_textf(font1, al_map_rgb(0, 0, 0), 510, 220, ALLEGRO_ALIGN_CENTRE, "%s", texto4);
-            al_draw_bitmap(imagem1,390,250,0);
-            al_draw_textf(font1, al_map_rgb(0, 0, 0), 510, 260, ALLEGRO_ALIGN_CENTRE, "%s", texto5);
-            al_draw_bitmap(imagem1,390,290,0);
-            al_draw_textf(font1, al_map_rgb(0, 0, 0), 510, 300, ALLEGRO_ALIGN_CENTRE, "%s", texto6);
-            al_draw_bitmap(imagem1,390,330,0);
-            al_draw_textf(font1, al_map_rgb(0, 0, 0), 510, 340, ALLEGRO_ALIGN_CENTRE, "%s", texto7);
-            al_flip_display();
+            Imprime_menu();
+
             doimprime=true;
         }
         fflush(stdin);
-        ///system("cls");
+
         ALLEGRO_EVENT ev;
         al_wait_for_event(event_queue, &ev);
 
@@ -585,80 +658,75 @@ int main()
         {
             switch(ev.keyboard.keycode)
             {
-                int j;
-
             case ALLEGRO_KEY_ESCAPE:
                 doimprime=false;
                 break;
 
             case ALLEGRO_KEY_1:
             case ALLEGRO_KEY_PAD_1:
+                j=100;
                 al_clear_to_color(al_map_rgb(168,168,168));
                 al_draw_textf(font1, al_map_rgb(0, 0, 0), 400, 550, ALLEGRO_ALIGN_CENTRE, "%s", texto8);
                 al_draw_textf(font2, al_map_rgb(0, 0, 0), 430, 50, ALLEGRO_ALIGN_CENTRE, "%s", texto1);
-                ordernar(Cabecalho);
-                Lista* ListaAux;
-                j = 100;
-                for (ListaAux=Cabecalho->iniciodecabecalho; ListaAux != NULL; ListaAux = ListaAux->listaprox)
+                Busca_serie(Arvore,0,0,0,0);
+                al_flip_display();
+                while(1)
                 {
-                    al_draw_textf(font1, al_map_rgb(0, 0, 0), 400, j, ALLEGRO_ALIGN_CENTRE, "Resis.= %8.1f  Serie.= E%.2d\tToler. = %5.2f Poten.= %5.2f  Quant.= %.4d  \n", ListaAux->ponteirodedados->resistencia, ListaAux->ponteirodedados->serie,ListaAux->ponteirodedados->tolerancia, ListaAux->ponteirodedados->potencia, ListaAux->ponteirodedados->quantidade);
-                    j=j+20;
-                    if(j==600)
+                    al_wait_for_event(event_queue, &ev);
+                    //if (ev.type == ALLEGRO_EVENT_KEY_CHAR)
+                    if(ev.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
                         break;
                 }
-                al_flip_display();
-                system("cls");
+                doimprime=false;
                 break;
+
             case ALLEGRO_KEY_2:
             case ALLEGRO_KEY_PAD_2:
                 al_clear_to_color(al_map_rgb(168,168,168));
                 al_draw_textf(font1, al_map_rgb(0, 0, 0), 400, 550, ALLEGRO_ALIGN_CENTRE, "%s", texto8);
-                manipular_entrada(ev);
-                al_flip_display();
-                /*adiciona_resistor(Cabecalho);
-                //system("pause");
-                system("cls");*/
-
+                al_draw_textf(font2, al_map_rgb(0, 0, 0), 430, 50, ALLEGRO_ALIGN_CENTRE, "%s", texto2);
+                //desenha_caixas();
+                opera_resistor(Arvore,ev,1);
+                //al_flip_display();
+                doimprime=0;
                 break;
             case ALLEGRO_KEY_3:
             case ALLEGRO_KEY_PAD_3:
                 al_clear_to_color(al_map_rgb(168,168,168));
                 al_draw_textf(font1, al_map_rgb(0, 0, 0), 400, 550, ALLEGRO_ALIGN_CENTRE, "%s", texto8);
+                al_draw_textf(font2, al_map_rgb(0, 0, 0), 430, 50, ALLEGRO_ALIGN_CENTRE, "%s", texto3);
+                desenha_caixas();
                 al_flip_display();
-                //busca_resistor(Cabecalho);
-                //system("pause");
-                system("cls");
-
+                opera_resistor(Arvore,ev,3);
+                doimprime=0;
                 break;
             case ALLEGRO_KEY_4:
             case ALLEGRO_KEY_PAD_4:
                 al_clear_to_color(al_map_rgb(168,168,168));
                 al_draw_textf(font1, al_map_rgb(0, 0, 0), 400, 550, ALLEGRO_ALIGN_CENTRE, "%s", texto8);
+                al_draw_textf(font2, al_map_rgb(0, 0, 0), 430, 50, ALLEGRO_ALIGN_CENTRE, "%s", texto4);
+                desenha_caixas();
                 al_flip_display();
-                //apaga_resistor(Cabecalho);
-                //system("pause");
-                system("cls");
-
+                opera_resistor(Arvore,ev,2);
+                doimprime=0;
                 break;
             case ALLEGRO_KEY_5:
             case ALLEGRO_KEY_PAD_5:
                 al_clear_to_color(al_map_rgb(168,168,168));
                 al_draw_textf(font1, al_map_rgb(0, 0, 0), 400, 550, ALLEGRO_ALIGN_CENTRE, "%s", texto8);
+                al_draw_textf(font2, al_map_rgb(0, 0, 0), 430, 50, ALLEGRO_ALIGN_CENTRE, "%s", texto5);
+                desenha_caixas();
                 al_flip_display();
-                //retira_resistor(Cabecalho);
-                //system("pause");
-                system("cls");
+                opera_resistor(Arvore,ev,0);
+                doimprime=0;
                 break;
-
-
             case ALLEGRO_KEY_6:
             case ALLEGRO_KEY_PAD_6:
                 al_clear_to_color(al_map_rgb(168,168,168));
-                fp = fopen(NOME_ARQ,"w");
-                for (ListaAux=Cabecalho->iniciodecabecalho; ListaAux != NULL; ListaAux = ListaAux->listaprox)
-                    fprintf(fp,"%8.1f\t%.2d\t%5.2f\t%5.2f\t%.4d \n", ListaAux->ponteirodedados->resistencia, ListaAux->ponteirodedados->serie,ListaAux->ponteirodedados->tolerancia, ListaAux->ponteirodedados->potencia, ListaAux->ponteirodedados->quantidade);
-                //system("pause");
                 system("cls");
+                fs = fopen(NOME_ARQ2,"w+");
+                Exporta_Arquivo(Arvore,fs);
+                fclose(fs);
                 al_draw_textf(font1, al_map_rgb(0, 0, 0), 400, 250, ALLEGRO_ALIGN_CENTRE, "*As alteracoes foram salvas*");
                 al_flip_display();
                 al_rest(1.3);
