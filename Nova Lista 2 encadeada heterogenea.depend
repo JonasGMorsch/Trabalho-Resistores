@@ -38,3 +38,39 @@
 	<locale.h>
 	<ctype.h>
 
+1457899762 source:c:\users\rafa\desktop\trabalho-resistores\main.c
+	<allegro5/allegro.h>
+	<allegro5/allegro_primitives.h>
+	<allegro5/allegro_image.h>
+	<allegro5/allegro_opengl.h>
+	<allegro5/allegro_font.h>
+	<allegro5/allegro_native_dialog.h>
+	<allegro5/allegro_ttf.h>
+	<allegro5/bitmap.h>
+	<allegro5/allegro_image.h>
+	<allegro5/allegro_acodec.h>
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<locale.h>
+	<ctype.h>
+	<stdbool.h>
+
+1457912840 source:c:\users\rafa\desktop\grafica 3.0\main.c
+	<allegro5/allegro.h>
+	<allegro5/allegro_primitives.h>
+	<allegro5/allegro_image.h>
+	<allegro5/allegro_opengl.h>
+	<allegro5/allegro_font.h>
+	<allegro5/allegro_native_dialog.h>
+	<allegro5/allegro_ttf.h>
+	<allegro5/bitmap.h>
+	<allegro5/allegro_image.h>
+	<allegro5/allegro_acodec.h>
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<locale.h>
+	<ctype.h>
+	<stdbool.h>
+
