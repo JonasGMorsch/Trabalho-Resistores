@@ -14,7 +14,6 @@
 #include <locale.h>
 #include <ctype.h>
 #include <stdbool.h>
-#include "common.c"
 
 const int SCREEN_W = 800;
 const int SCREEN_H = 600;
@@ -39,11 +38,9 @@ ALLEGRO_DISPLAY *display = NULL;
 ALLEGRO_FONT *font1 = NULL;
 ALLEGRO_FONT *font2 = NULL;
 ALLEGRO_FONT *font3 = NULL;
-ALLEGRO_BITMAP  *img   = NULL;
-ALLEGRO_BITMAP  *imagem1  = NULL;
-ALLEGRO_BITMAP *imagem2 = NULL;
-ALLEGRO_BITMAP *imagem3 = NULL;
-ALLEGRO_BITMAP *icon1;
+ALLEGRO_BITMAP *ifsc = NULL;
+ALLEGRO_BITMAP *resistor = NULL;
+ALLEGRO_BITMAP *icone = NULL;
 ALLEGRO_EVENT_QUEUE *event_queue = NULL;
 ALLEGRO_EVENT ev;
 
@@ -280,12 +277,10 @@ bool inicializar()
     al_init_ttf_addon();
     al_install_mouse();
     al_install_keyboard();
-    img = al_load_bitmap("res2.png");
-    imagem1 = al_load_bitmap("fundo.png");
-    imagem2 = al_load_bitmap("opcoes.png");
-    imagem3 = al_load_bitmap("ifsc2.png");
-    icon1 = al_load_bitmap("res3.png");
-    al_set_display_icon(display,icon1);
+    resistor = al_load_bitmap("res.png");
+    ifsc = al_load_bitmap("ifsc.png");
+    icone = al_load_bitmap("res.png");
+    al_set_display_icon(display,icone);  ///   ///////////////
     font1 = al_load_ttf_font("arial.TTF",18,15);
     font2 = al_load_ttf_font("arial.TTF",25,15 );
     font3 = al_load_ttf_font("arial.TTF",20,15 );
@@ -327,6 +322,9 @@ void opera_resistor(Serie*Arvore,ALLEGRO_EVENT ev, int soma)
     int serie=0,quantidade=0;
     float resitencia=0,potencia=0;
 
+    ALLEGRO_COLOR Branco;
+    Branco =al_map_rgb(255,255,255);
+
     al_draw_filled_rectangle(450,150,650,190,al_map_rgb(205,205,205));
     al_draw_filled_rectangle(450,240,650,280,al_map_rgb(205,205,205));
     al_draw_filled_rectangle(450,330,650,370,al_map_rgb(205,205,205));
@@ -351,7 +349,7 @@ void opera_resistor(Serie*Arvore,ALLEGRO_EVENT ev, int soma)
                 if((ev.keyboard.keycode == ALLEGRO_KEY_DOWN)||(ev.keyboard.keycode == ALLEGRO_KEY_ENTER) || (ev.keyboard.keycode == ALLEGRO_KEY_PAD_ENTER))
                     break;
 
-            al_draw_filled_rectangle(450,150,650,190,al_map_rgb(255,255,255));
+            al_draw_filled_rectangle(450,150,650,190,Branco);
             manipular_entrada(ev);
             al_draw_textf(font1, al_map_rgb(0, 0, 0), 460, 160, ALLEGRO_ALIGN_LEFT, "%s",str);
             al_flip_display();
@@ -375,7 +373,7 @@ void opera_resistor(Serie*Arvore,ALLEGRO_EVENT ev, int soma)
             if((ev.keyboard.keycode == ALLEGRO_KEY_DOWN)||(ev.keyboard.keycode == ALLEGRO_KEY_ENTER) || (ev.keyboard.keycode == ALLEGRO_KEY_PAD_ENTER))
                 break;
 
-        al_draw_filled_rectangle(450,150+90,650,280,al_map_rgb(255,255,255));
+        al_draw_filled_rectangle(450,150+90,650,280,Branco);
         manipular_entrada(ev);
         al_draw_textf(font1, al_map_rgb(0, 0, 0), 460, 250, ALLEGRO_ALIGN_LEFT, "%s",str);
         al_flip_display();
@@ -396,7 +394,7 @@ void opera_resistor(Serie*Arvore,ALLEGRO_EVENT ev, int soma)
             if((ev.keyboard.keycode == ALLEGRO_KEY_DOWN)||(ev.keyboard.keycode == ALLEGRO_KEY_ENTER) || (ev.keyboard.keycode == ALLEGRO_KEY_PAD_ENTER))
                 break;
 
-        al_draw_filled_rectangle(450,330,650,370,al_map_rgb(255,255,255));
+        al_draw_filled_rectangle(450,330,650,370,Branco);
         manipular_entrada(ev);
         al_draw_textf(font1, al_map_rgb(0, 0, 0), 460, 340, ALLEGRO_ALIGN_LEFT, "%s",str);
         al_flip_display();
@@ -420,7 +418,7 @@ void opera_resistor(Serie*Arvore,ALLEGRO_EVENT ev, int soma)
                 if (ev.type == ALLEGRO_EVENT_KEY_CHAR)
                     if((ev.keyboard.keycode == ALLEGRO_KEY_DOWN)||(ev.keyboard.keycode == ALLEGRO_KEY_ENTER) || (ev.keyboard.keycode == ALLEGRO_KEY_PAD_ENTER))
                         break;
-                al_draw_filled_rectangle(450,420,650,460,al_map_rgb(255,255,255));
+                al_draw_filled_rectangle(450,420,650,460,Branco);
                 manipular_entrada(ev);
                 al_draw_textf(font1, al_map_rgb(0, 0, 0), 460,430, ALLEGRO_ALIGN_LEFT, "%s",str);
                 al_flip_display();
@@ -500,8 +498,8 @@ void Imprime_menu(void)
     ALLEGRO_COLOR preto;
     preto =al_map_rgb(0, 0, 0);
     al_clear_to_color(al_map_rgb(168,168,168));
-    al_draw_bitmap(img, 1, 1, 1);
-    al_draw_bitmap(imagem3, 1,490, 0);
+    al_draw_bitmap(resistor, 1, 1, 0);
+    al_draw_bitmap(ifsc, 1,420, 0);
     al_draw_textf(font1,preto, 105, 545, ALLEGRO_ALIGN_LEFT, "%s", texto9);
     al_draw_textf(font1,preto, 105, 567, ALLEGRO_ALIGN_LEFT, "%s", texto10);
     al_draw_textf(font1,preto, 590, 567, ALLEGRO_ALIGN_LEFT, "Jonas G. Morsch");
@@ -525,13 +523,6 @@ void Imprime_caixas_menu(void)
 {
     ALLEGRO_COLOR preto;
     preto =al_map_rgb(0, 0, 0);
-    /*al_clear_to_color(al_map_rgb(168,168,168));
-    al_draw_bitmap(img, 1, 1, 1);
-    al_draw_bitmap(imagem3, 1,490, 0);*/
-    al_draw_textf(font1,preto, 105, 545, ALLEGRO_ALIGN_LEFT, "%s", texto9);
-    al_draw_textf(font1,preto, 105, 567, ALLEGRO_ALIGN_LEFT, "%s", texto10);
-    //al_draw_textf(font1,preto, 590, 567, ALLEGRO_ALIGN_LEFT, "Jonas G. Morsch");
-    al_draw_textf(font2,preto, 510, 30, ALLEGRO_ALIGN_CENTRE, "%s", texto);
     al_draw_filled_rectangle(389,90,630,126,al_map_rgb(205,205,205));
     al_draw_textf(font1,preto, 510, 100, ALLEGRO_ALIGN_CENTRE, "%s", texto1);
     al_draw_filled_rectangle(389,130,630,166,al_map_rgb(205,205,205));
@@ -544,7 +535,7 @@ void Imprime_caixas_menu(void)
     al_draw_textf(font1,preto, 510, 260, ALLEGRO_ALIGN_CENTRE, "%s", texto5);
     al_draw_filled_rectangle(389,290,630,326,al_map_rgb(205,205,205));
     al_draw_textf(font1,preto, 510, 300, ALLEGRO_ALIGN_CENTRE, "%s", texto6);
-    //al_flip_display();
+
 }
 
 void mouse_selecao(ALLEGRO_EVENT ev)
@@ -558,42 +549,42 @@ void mouse_selecao(ALLEGRO_EVENT ev)
         if(ev.mouse.y >= 90 && ev.mouse.y <= 126)
         {
             Imprime_caixas_menu();
-            al_draw_filled_rectangle(389,90,630,126,al_map_rgb(255,255,255));
+            al_draw_filled_rectangle(389,90,630,126,Branco);
             al_draw_textf(font1, al_map_rgb(0, 0, 0), 510, 100, ALLEGRO_ALIGN_CENTRE, "%s", texto1);
             al_flip_display();
         }
         else if(ev.mouse.y >= 130 && ev.mouse.y <= 166)
         {
             Imprime_caixas_menu();
-            al_draw_filled_rectangle(389,130,630,166,al_map_rgb(255,255,255));
+            al_draw_filled_rectangle(389,130,630,166,Branco);
             al_draw_textf(font1, al_map_rgb(0, 0, 0), 510, 140, ALLEGRO_ALIGN_CENTRE, "%s", texto2);
             al_flip_display();
         }
         else if(ev.mouse.y >= 170 && ev.mouse.y <= 206)
         {
             Imprime_caixas_menu();
-            al_draw_filled_rectangle(389,170,630,206,al_map_rgb(255,255,255));
+            al_draw_filled_rectangle(389,170,630,206,Branco);
             al_draw_textf(font1, al_map_rgb(0, 0, 0), 510, 180, ALLEGRO_ALIGN_CENTRE, "%s", texto3);
             al_flip_display();
         }
         else if(ev.mouse.y >= 210 && ev.mouse.y <= 246)
         {
             Imprime_caixas_menu();
-            al_draw_filled_rectangle(389,210,630,246,al_map_rgb(255,255,255));
+            al_draw_filled_rectangle(389,210,630,246,Branco);
             al_draw_textf(font1, al_map_rgb(0, 0, 0), 510, 220, ALLEGRO_ALIGN_CENTRE, "%s", texto4);
             al_flip_display();
         }
         else if(ev.mouse.y >= 250 && ev.mouse.y <= 286)
         {
             Imprime_caixas_menu();
-            al_draw_filled_rectangle(389,250,630,286,al_map_rgb(255,255,255));
+            al_draw_filled_rectangle(389,250,630,286,Branco);
             al_draw_textf(font1, al_map_rgb(0, 0, 0), 510, 260, ALLEGRO_ALIGN_CENTRE, "%s", texto5);
             al_flip_display();
         }
         else if(ev.mouse.y >= 290 && ev.mouse.y <= 326)
         {
             Imprime_caixas_menu();
-            al_draw_filled_rectangle(389,290,630,326,al_map_rgb(255,255,255));
+            al_draw_filled_rectangle(389,290,630,326,Branco);
             al_draw_textf(font1, al_map_rgb(0, 0, 0), 510, 300, ALLEGRO_ALIGN_CENTRE, "%s", texto6);
             al_flip_display();
         }
@@ -815,7 +806,8 @@ int main()
             }
         }
     }
-    al_destroy_bitmap(img);
+    al_destroy_bitmap(resistor);
+    al_destroy_bitmap(ifsc);
     al_destroy_display(display);
     return 0;
 }
